@@ -210,6 +210,18 @@ class TrackerApp(QMainWindow):
                 background-color: {self.colors['bg_tertiary']};
             }}
 
+            QPushButton.filter-active {{
+                background-color: {self.colors['accent']};
+                color: {self.colors['text_primary']};
+                padding: 6px 12px;
+                font-size: 9pt;
+                font-weight: bold;
+            }}
+
+            QPushButton.filter-active:hover {{
+                background-color: {self.colors['accent_hover']};
+            }}
+
             QPushButton.danger {{
                 background-color: {self.colors['error']};
                 color: {self.colors['text_primary']};
@@ -403,12 +415,6 @@ class TrackerApp(QMainWindow):
         button_log.clicked.connect(self.debug_log_format)
         button_row.addWidget(button_log)
 
-        button_drops = QPushButton("📋 Drops Detail")
-        button_drops.setProperty("class", "secondary")
-        button_drops.setCursor(Qt.PointingHandCursor)
-        button_drops.clicked.connect(self.show_drops_window)
-        button_row.addWidget(button_drops)
-
         button_export = QPushButton("📊 Export")
         button_export.setProperty("class", "secondary")
         button_export.setCursor(Qt.PointingHandCursor)
@@ -450,6 +456,69 @@ class TrackerApp(QMainWindow):
         header_layout.addWidget(self.button_change)
 
         layout.addLayout(header_layout)
+
+        # Filter buttons
+        filters_label = QLabel("FILTERS")
+        filters_label.setProperty("class", "status")
+        layout.addWidget(filters_label)
+
+        # First row of filter buttons
+        filter_row1 = QHBoxLayout()
+        filter_row1.setSpacing(5)
+
+        self.btn_filter_all = QPushButton("All")
+        self.btn_filter_all.setProperty("class", "filter-active")
+        self.btn_filter_all.setCursor(Qt.PointingHandCursor)
+        self.btn_filter_all.clicked.connect(lambda: self.set_filter(ITEM_TYPES))
+        filter_row1.addWidget(self.btn_filter_all)
+
+        self.btn_filter_currency = QPushButton("Currency")
+        self.btn_filter_currency.setProperty("class", "secondary")
+        self.btn_filter_currency.setCursor(Qt.PointingHandCursor)
+        self.btn_filter_currency.clicked.connect(lambda: self.set_filter(FILTER_CURRENCY))
+        filter_row1.addWidget(self.btn_filter_currency)
+
+        self.btn_filter_embers = QPushButton("Embers")
+        self.btn_filter_embers.setProperty("class", "secondary")
+        self.btn_filter_embers.setCursor(Qt.PointingHandCursor)
+        self.btn_filter_embers.clicked.connect(lambda: self.set_filter(FILTER_ASHES))
+        filter_row1.addWidget(self.btn_filter_embers)
+
+        layout.addLayout(filter_row1)
+
+        # Second row of filter buttons
+        filter_row2 = QHBoxLayout()
+        filter_row2.setSpacing(5)
+
+        self.btn_filter_compass = QPushButton("Compass")
+        self.btn_filter_compass.setProperty("class", "secondary")
+        self.btn_filter_compass.setCursor(Qt.PointingHandCursor)
+        self.btn_filter_compass.clicked.connect(lambda: self.set_filter(FILTER_COMPASS))
+        filter_row2.addWidget(self.btn_filter_compass)
+
+        self.btn_filter_memory = QPushButton("Memory")
+        self.btn_filter_memory.setProperty("class", "secondary")
+        self.btn_filter_memory.setCursor(Qt.PointingHandCursor)
+        self.btn_filter_memory.clicked.connect(lambda: self.set_filter(FILTER_GLOW))
+        filter_row2.addWidget(self.btn_filter_memory)
+
+        self.btn_filter_others = QPushButton("Others")
+        self.btn_filter_others.setProperty("class", "secondary")
+        self.btn_filter_others.setCursor(Qt.PointingHandCursor)
+        self.btn_filter_others.clicked.connect(lambda: self.set_filter(FILTER_OTHERS))
+        filter_row2.addWidget(self.btn_filter_others)
+
+        layout.addLayout(filter_row2)
+
+        # Store filter buttons for easy access
+        self.filter_buttons = {
+            tuple(ITEM_TYPES): self.btn_filter_all,
+            tuple(FILTER_CURRENCY): self.btn_filter_currency,
+            tuple(FILTER_ASHES): self.btn_filter_embers,
+            tuple(FILTER_COMPASS): self.btn_filter_compass,
+            tuple(FILTER_GLOW): self.btn_filter_memory,
+            tuple(FILTER_OTHERS): self.btn_filter_others,
+        }
 
         # Drops list
         self.inner_pannel_drop_listbox = QListWidget()
@@ -686,6 +755,18 @@ class TrackerApp(QMainWindow):
             item_types: List of item types to display.
         """
         self.current_show_types = item_types
+
+        # Update button styling to show active filter
+        filter_key = tuple(item_types)
+        for key, button in self.filter_buttons.items():
+            if key == filter_key:
+                button.setProperty("class", "filter-active")
+            else:
+                button.setProperty("class", "secondary")
+            # Force style update
+            button.style().unpolish(button)
+            button.style().polish(button)
+
         self.reshow()
 
     def show_drops_window(self) -> None:
