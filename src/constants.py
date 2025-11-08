@@ -80,12 +80,12 @@ PRICE_SAMPLE_SIZE = 30
 EXCLUDED_ITEM_ID = "100300"
 
 # Status Indicators
-STATUS_FRESH = "✔"  # < 3 minutes
-STATUS_STALE = "◯"  # 3-15 minutes
-STATUS_OLD = "✘"    # > 15 minutes
+STATUS_FRESH = "✔"  # < 2 hours
+STATUS_STALE = "◯"  # 2-24 hours
+STATUS_OLD = "✘"    # > 24 hours
 
-TIME_FRESH_THRESHOLD = 180    # 3 minutes in seconds
-TIME_STALE_THRESHOLD = 900    # 15 minutes in seconds
+TIME_FRESH_THRESHOLD = 7200    # 2 hours in seconds
+TIME_STALE_THRESHOLD = 86400    # 24 hours in seconds
 
 # Initialization Configuration
 MIN_BAG_ITEMS_FOR_INIT = 20
