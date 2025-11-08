@@ -94,7 +94,9 @@ class GameDetector:
             try:
                 with open(log_path, "r", encoding="utf-8") as f:
                     preview = f.read(100)
-                    logger.info(f"Successfully opened log file. Preview: {preview[:50]}...")
+                    # Remove BOM and other problematic characters for logging
+                    preview_clean = preview.replace('\ufeff', '').replace('\r', '').replace('\n', ' ')
+                    logger.info(f"Successfully opened log file. Preview: {preview_clean[:50]}...")
             except IOError as e:
                 logger.error(f"Cannot read log file: {e}")
                 return False, None
