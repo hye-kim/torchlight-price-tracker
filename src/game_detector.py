@@ -16,8 +16,6 @@ try:
 except ImportError:
     WINDOWS_MODULES_AVAILABLE = False
 
-from .constants import GAME_WINDOW_TITLE, LOG_FILE_RELATIVE_PATH
-
 logger = logging.getLogger(__name__)
 
 
@@ -84,11 +82,8 @@ class GameDetector:
             self.game_exe_path = process.exe()
 
             # Calculate log file path relative to game executable
-            log_path = os.path.join(
-                os.path.dirname(self.game_exe_path),
-                LOG_FILE_RELATIVE_PATH
-            )
-            log_path = os.path.normpath(log_path)
+            # Note: We concatenate directly to exe path (not dirname) to get correct relative navigation
+            log_path = self.game_exe_path + "/../../../TorchLight/Saved/Logs/UE_game.log"
             log_path = log_path.replace("\\", "/")
 
             # Verify log file exists and is readable
