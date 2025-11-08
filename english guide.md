@@ -14,19 +14,6 @@ This is the English version of the FurTorch Torchlight Infinite income statistic
    python index.py
    ```
 
-## Building Executable
-
-To create a standalone executable:
-1. Install py2exe:
-   ```
-   pip install py2exe
-   ```
-2. Run the setup script:
-   ```
-   python setup_english.py py2exe
-   ```
-3. The executable will be created in the `dist` folder
-
 ## Usage Instructions
 
 1. Before starting the application, make sure to enable logging in Torchlight Infinite:
