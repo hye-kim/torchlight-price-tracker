@@ -108,116 +108,318 @@ class TrackerApp(tk.Tk):
         self.attributes('-toolwindow', True)
         self.attributes('-topmost', True)
 
+        # Apply modern theme
+        self._apply_modern_theme()
+
+    def _apply_modern_theme(self) -> None:
+        """Apply modern color scheme and styling to the UI."""
+        # Modern color palette
+        self.colors = {
+            'bg_primary': '#1e1e2e',      # Dark background
+            'bg_secondary': '#2a2a3e',    # Slightly lighter background
+            'bg_tertiary': '#363650',     # Card/section background
+            'accent': '#8b5cf6',          # Purple accent
+            'accent_hover': '#9d70f7',    # Lighter purple for hover
+            'success': '#10b981',         # Green for success
+            'warning': '#f59e0b',         # Orange for warning
+            'error': '#ef4444',           # Red for error
+            'text_primary': '#e2e8f0',    # Light text
+            'text_secondary': '#94a3b8',  # Muted text
+            'border': '#4a4a5e',          # Border color
+        }
+
+        # Configure main window background
+        self.configure(bg=self.colors['bg_primary'])
+
+        # Create custom ttk style
+        self.style = ttk.Style()
+        self.style.theme_use('clam')  # Use clam as base theme for customization
+
+        # Configure TFrame
+        self.style.configure(
+            'TFrame',
+            background=self.colors['bg_primary']
+        )
+
+        # Configure Card Frame (for sections)
+        self.style.configure(
+            'Card.TFrame',
+            background=self.colors['bg_tertiary'],
+            relief='flat',
+            borderwidth=0
+        )
+
+        # Configure TLabel
+        self.style.configure(
+            'TLabel',
+            background=self.colors['bg_primary'],
+            foreground=self.colors['text_primary'],
+            font=('Segoe UI', 11)
+        )
+
+        # Configure Header labels (larger stats)
+        self.style.configure(
+            'Header.TLabel',
+            background=self.colors['bg_tertiary'],
+            foreground=self.colors['text_primary'],
+            font=('Segoe UI', 13, 'bold'),
+            padding=5
+        )
+
+        # Configure Status labels
+        self.style.configure(
+            'Status.TLabel',
+            background=self.colors['bg_tertiary'],
+            foreground=self.colors['text_secondary'],
+            font=('Segoe UI', 9)
+        )
+
+        # Configure TButton
+        self.style.configure(
+            'TButton',
+            background=self.colors['accent'],
+            foreground=self.colors['text_primary'],
+            borderwidth=0,
+            relief='flat',
+            padding=(15, 8),
+            font=('Segoe UI', 10, 'bold')
+        )
+
+        self.style.map('TButton',
+            background=[('active', self.colors['accent_hover']),
+                       ('pressed', self.colors['accent'])],
+            foreground=[('active', self.colors['text_primary'])]
+        )
+
+        # Configure Secondary buttons
+        self.style.configure(
+            'Secondary.TButton',
+            background=self.colors['bg_secondary'],
+            foreground=self.colors['text_primary'],
+            borderwidth=1,
+            relief='flat',
+            padding=(12, 6),
+            font=('Segoe UI', 9)
+        )
+
+        self.style.map('Secondary.TButton',
+            background=[('active', self.colors['bg_tertiary']),
+                       ('pressed', self.colors['bg_secondary'])],
+            bordercolor=[('focus', self.colors['accent'])]
+        )
+
+        # Configure Exit button (danger style)
+        self.style.configure(
+            'Danger.TButton',
+            background=self.colors['error'],
+            foreground=self.colors['text_primary'],
+            borderwidth=0,
+            relief='flat',
+            padding=(15, 8),
+            font=('Segoe UI', 10, 'bold')
+        )
+
+        self.style.map('Danger.TButton',
+            background=[('active', '#dc2626'),
+                       ('pressed', self.colors['error'])]
+        )
+
+        # Configure TScrollbar
+        self.style.configure(
+            'Vertical.TScrollbar',
+            background=self.colors['bg_secondary'],
+            troughcolor=self.colors['bg_primary'],
+            borderwidth=0,
+            arrowsize=12
+        )
+
     def _create_widgets(self) -> None:
         """Create all GUI widgets."""
-        # Main frames
-        basic_frame = ttk.Frame(self)
-        advanced_frame = ttk.Frame(self)
-        basic_frame.pack(side="top", fill="both")
-        advanced_frame.pack(side="top", fill="both")
+        # Main container with padding
+        main_container = ttk.Frame(self)
+        main_container.pack(fill="both", expand=True, padx=10, pady=10)
 
-        # Basic frame widgets (stats display)
-        self.label_current_time = ttk.Label(
-            basic_frame, text="Current: 0m00s",
-            font=(UI_FONT_FAMILY, UI_FONT_SIZE_LARGE), anchor="w"
+        # Stats card frame
+        stats_card = ttk.Frame(main_container, style='Card.TFrame')
+        stats_card.pack(fill="both", padx=0, pady=(0, 10))
+
+        # Stats frame inside card
+        stats_frame = ttk.Frame(stats_card, style='Card.TFrame')
+        stats_frame.pack(fill="both", padx=15, pady=15)
+
+        # Current map stats (row 0)
+        current_label = ttk.Label(
+            stats_frame, text="CURRENT MAP",
+            style='Status.TLabel'
         )
-        self.label_current_time.grid(row=0, column=0, padx=5, sticky="w")
+        current_label.grid(row=0, column=0, columnspan=3, sticky="w", pady=(0, 5))
+
+        self.label_current_time = ttk.Label(
+            stats_frame, text="⏱ 0m00s",
+            style='Header.TLabel'
+        )
+        self.label_current_time.grid(row=1, column=0, padx=(0, 15), sticky="w")
 
         self.label_current_speed = ttk.Label(
-            basic_frame, text="🔥 0 /min",
-            font=(UI_FONT_FAMILY, UI_FONT_SIZE_LARGE)
+            stats_frame, text="🔥 0 /min",
+            style='Header.TLabel'
         )
-        self.label_current_speed.grid(row=0, column=1, padx=5, sticky="w")
-
-        self.label_total_time = ttk.Label(
-            basic_frame, text="Total: 0m00s",
-            font=(UI_FONT_FAMILY, UI_FONT_SIZE_LARGE), anchor="w"
-        )
-        self.label_total_time.grid(row=1, column=0, padx=5, sticky="w")
-
-        self.label_total_speed = ttk.Label(
-            basic_frame, text="🔥 0 /min",
-            font=(UI_FONT_FAMILY, UI_FONT_SIZE_LARGE)
-        )
-        self.label_total_speed.grid(row=1, column=1, padx=5, sticky="w")
+        self.label_current_speed.grid(row=1, column=1, padx=(0, 15), sticky="w")
 
         self.label_map_count = ttk.Label(
-            basic_frame, text="🎫 0",
-            font=(UI_FONT_FAMILY, UI_FONT_SIZE_LARGE)
+            stats_frame, text="🎫 0 maps",
+            style='Header.TLabel'
         )
-        self.label_map_count.grid(row=0, column=2, padx=5, sticky="w")
+        self.label_map_count.grid(row=1, column=2, sticky="w")
+
+        # Separator
+        separator1 = ttk.Frame(stats_frame, height=1, style='Card.TFrame')
+        separator1.grid(row=2, column=0, columnspan=3, sticky="ew", pady=10)
+
+        # Total stats (row 3)
+        total_label = ttk.Label(
+            stats_frame, text="TOTAL SESSION",
+            style='Status.TLabel'
+        )
+        total_label.grid(row=3, column=0, columnspan=3, sticky="w", pady=(0, 5))
+
+        self.label_total_time = ttk.Label(
+            stats_frame, text="⏱ 0m00s",
+            style='Header.TLabel'
+        )
+        self.label_total_time.grid(row=4, column=0, padx=(0, 15), sticky="w")
+
+        self.label_total_speed = ttk.Label(
+            stats_frame, text="🔥 0 /min",
+            style='Header.TLabel'
+        )
+        self.label_total_speed.grid(row=4, column=1, padx=(0, 15), sticky="w")
 
         self.label_current_earn = ttk.Label(
-            basic_frame, text="🔥 0",
-            font=(UI_FONT_FAMILY, UI_FONT_SIZE_LARGE)
+            stats_frame, text="🔥 0 total",
+            style='Header.TLabel'
         )
-        self.label_current_earn.grid(row=1, column=2, padx=5, sticky="w")
+        self.label_current_earn.grid(row=4, column=2, sticky="w")
 
-        # Initialize button
+        # Control panel frame
+        control_frame = ttk.Frame(main_container, style='Card.TFrame')
+        control_frame.pack(fill="both", padx=0, pady=(0, 10))
+
+        # Control buttons inside card
+        controls = ttk.Frame(control_frame, style='Card.TFrame')
+        controls.pack(fill="both", padx=15, pady=15)
+
+        # Initialize section
+        init_label = ttk.Label(
+            controls, text="INITIALIZATION",
+            style='Status.TLabel'
+        )
+        init_label.grid(row=0, column=0, columnspan=2, sticky="w", pady=(0, 8))
+
         self.button_initialize = ttk.Button(
-            basic_frame, text="Initialize",
+            controls, text="Initialize Tracker",
             cursor="hand2", command=self.start_initialization
         )
-        self.button_initialize.grid(row=0, column=3, padx=5, pady=5)
+        self.button_initialize.grid(row=1, column=0, sticky="ew", padx=(0, 10))
 
         self.label_initialize_status = ttk.Label(
-            basic_frame, text="Not initialized",
-            font=(UI_FONT_FAMILY, UI_FONT_SIZE_MEDIUM)
+            controls, text="Not initialized",
+            style='Status.TLabel'
         )
-        self.label_initialize_status.grid(row=1, column=3, padx=5, pady=2)
+        self.label_initialize_status.grid(row=1, column=1, sticky="w")
 
-        # Exit button
+        # Separator
+        separator2 = ttk.Frame(controls, height=1, style='Card.TFrame')
+        separator2.grid(row=2, column=0, columnspan=2, sticky="ew", pady=12)
+
+        # Action buttons
+        action_label = ttk.Label(
+            controls, text="ACTIONS",
+            style='Status.TLabel'
+        )
+        action_label.grid(row=3, column=0, columnspan=2, sticky="w", pady=(0, 8))
+
+        button_frame = ttk.Frame(controls, style='Card.TFrame')
+        button_frame.grid(row=4, column=0, columnspan=2, sticky="ew")
+
         button_exit = ttk.Button(
-            basic_frame, text="Exit",
+            button_frame, text="Exit",
+            style='Danger.TButton',
             cursor="hand2", command=self.exit_app
         )
-        button_exit.grid(row=0, column=4, padx=5, pady=5)
-
-        # Advanced frame widgets (drop list and controls)
-        self.inner_pannel_drop_listbox = Listbox(
-            advanced_frame,
-            height=UI_LISTBOX_HEIGHT,
-            width=UI_LISTBOX_WIDTH,
-            font=(UI_FONT_FAMILY, UI_FONT_SIZE_MEDIUM)
+        button_settings = ttk.Button(
+            button_frame, text="⚙ Settings",
+            style='Secondary.TButton',
+            cursor="hand2", command=self.show_settings_window
         )
-        self.inner_pannel_drop_listbox.insert(END, "Drops will be displayed here")
-        self.inner_pannel_drop_listbox.grid(row=0, column=0, columnspan=6, sticky="nsew")
+        button_settings.pack(side="right", padx=(5, 0))
 
-        inner_pannel_drop_scroll = ttk.Scrollbar(
-            advanced_frame,
-            command=self.inner_pannel_drop_listbox.yview,
-            orient="vertical"
-        )
-        inner_pannel_drop_scroll.grid(row=0, column=6, sticky="ns")
-        self.inner_pannel_drop_listbox.config(yscrollcommand=inner_pannel_drop_scroll.set)
-
-        # Control buttons
         button_drops = ttk.Button(
-            advanced_frame, text="Drops",
-            cursor="hand2", width=7, command=self.show_drops_window
+            button_frame, text="📋 Drops Detail",
+            style='Secondary.TButton',
+            cursor="hand2", command=self.show_drops_window
         )
-        button_drops.grid(row=1, column=0, sticky="w", padx=5, pady=5)
+        button_drops.pack(side="right", padx=(5, 0))
 
         button_log = ttk.Button(
-            advanced_frame, text="Log",
-            width=7, cursor="hand2", command=self.debug_log_format
+            button_frame, text="🔍 Debug Log",
+            style='Secondary.TButton',
+            cursor="hand2", command=self.debug_log_format
         )
-        button_log.grid(row=1, column=1, sticky="w", padx=5, pady=5)
+        button_log.pack(side="left")
+
+        # Drops card frame
+        drops_card = ttk.Frame(main_container, style='Card.TFrame')
+        drops_card.pack(fill="both", expand=True, padx=0, pady=0)
+
+        # Drops header
+        drops_header = ttk.Frame(drops_card, style='Card.TFrame')
+        drops_header.pack(fill="x", padx=15, pady=(15, 10))
+
+        drops_title = ttk.Label(
+            drops_header, text="RECENT DROPS",
+            style='Status.TLabel'
+        )
+        drops_title.pack(side="left")
 
         self.words_short = StringVar()
         self.words_short.set("Current Map")
         button_change = ttk.Button(
-            advanced_frame,
+            drops_header,
             textvariable=self.words_short,
-            width=10, cursor="hand2", command=self.change_states
+            style='Secondary.TButton',
+            cursor="hand2", command=self.change_states
         )
-        button_change.grid(row=1, column=3, pady=5)
+        button_change.pack(side="right")
 
-        button_settings = ttk.Button(
-            advanced_frame, text="Settings",
-            cursor="hand2", width=7, command=self.show_settings_window
+        # Drops list container
+        drops_container = ttk.Frame(drops_card, style='Card.TFrame')
+        drops_container.pack(fill="both", expand=True, padx=15, pady=(0, 15))
+
+        # Styled listbox
+        self.inner_pannel_drop_listbox = Listbox(
+            drops_container,
+            height=UI_LISTBOX_HEIGHT,
+            width=UI_LISTBOX_WIDTH,
+            font=('Segoe UI', 10),
+            bg=self.colors['bg_secondary'],
+            fg=self.colors['text_primary'],
+            selectbackground=self.colors['accent'],
+            selectforeground=self.colors['text_primary'],
+            borderwidth=0,
+            highlightthickness=0,
+            relief='flat'
         )
-        button_settings.grid(row=1, column=5, sticky="e", padx=5, pady=5)
+        self.inner_pannel_drop_listbox.insert(END, "Drops will be displayed here...")
+        self.inner_pannel_drop_listbox.pack(side="left", fill="both", expand=True)
+
+        inner_pannel_drop_scroll = ttk.Scrollbar(
+            drops_container,
+            command=self.inner_pannel_drop_listbox.yview,
+            orient="vertical"
+        )
+        inner_pannel_drop_scroll.pack(side="right", fill="y")
+        self.inner_pannel_drop_listbox.config(yscrollcommand=inner_pannel_drop_scroll.set)
 
         # Create popup windows
         self._create_drops_window()
@@ -226,103 +428,170 @@ class TrackerApp(tk.Tk):
     def _create_drops_window(self) -> None:
         """Create the drops detail window."""
         self.inner_pannel_drop = tk.Toplevel(self)
-        self.inner_pannel_drop.title("Drops")
+        self.inner_pannel_drop.title("Drops Detail - FurTorch")
         self.inner_pannel_drop.resizable(False, False)
         self.inner_pannel_drop.attributes('-toolwindow', True)
         self.inner_pannel_drop.attributes('-topmost', True)
+        self.inner_pannel_drop.configure(bg=self.colors['bg_primary'])
         self.inner_pannel_drop.withdraw()
+
+        # Main container
+        main_frame = ttk.Frame(self.inner_pannel_drop)
+        main_frame.pack(fill="both", expand=True, padx=15, pady=15)
+
+        # Header section
+        header_frame = ttk.Frame(main_frame, style='Card.TFrame')
+        header_frame.pack(fill="x", pady=(0, 15))
+
+        header_content = ttk.Frame(header_frame, style='Card.TFrame')
+        header_content.pack(fill="x", padx=15, pady=15)
+
+        header_label = ttk.Label(
+            header_content, text="DROP FILTERS",
+            style='Status.TLabel'
+        )
+        header_label.pack(side="top", anchor="w", pady=(0, 10))
 
         # Toggle button
         self.words = StringVar()
         self.words.set("Current: Current Map Drops (Click to toggle All Drops)")
         inner_pannel_drop_show_all = ttk.Button(
-            self.inner_pannel_drop,
+            header_content,
             textvariable=self.words,
-            width=30, cursor="hand2", command=self.change_states
+            cursor="hand2", command=self.change_states
         )
-        inner_pannel_drop_show_all.grid(row=0, column=1)
+        inner_pannel_drop_show_all.pack(fill="x")
 
-        # Filter buttons
-        button_all = ttk.Button(
-            self.inner_pannel_drop, text="All",
-            width=7, cursor="hand2", command=lambda: self.set_filter(ITEM_TYPES)
-        )
-        button_all.grid(row=0, column=0, padx=5, ipady=10)
+        # Filter buttons section
+        filters_frame = ttk.Frame(main_frame, style='Card.TFrame')
+        filters_frame.pack(fill="x", pady=0)
 
-        button_currency = ttk.Button(
-            self.inner_pannel_drop, text="Currency",
-            width=7, cursor="hand2", command=lambda: self.set_filter(FILTER_CURRENCY)
-        )
-        button_currency.grid(row=1, column=0, padx=5, ipady=10)
+        filters_content = ttk.Frame(filters_frame, style='Card.TFrame')
+        filters_content.pack(fill="x", padx=15, pady=15)
 
-        button_ashes = ttk.Button(
-            self.inner_pannel_drop, text="Ashes",
-            width=7, cursor="hand2", command=lambda: self.set_filter(FILTER_ASHES)
+        filters_label = ttk.Label(
+            filters_content, text="ITEM CATEGORIES",
+            style='Status.TLabel'
         )
-        button_ashes.grid(row=2, column=0, padx=5, ipady=10)
+        filters_label.pack(side="top", anchor="w", pady=(0, 10))
 
-        button_compass = ttk.Button(
-            self.inner_pannel_drop, text="Compass",
-            width=7, cursor="hand2", command=lambda: self.set_filter(FILTER_COMPASS)
-        )
-        button_compass.grid(row=3, column=0, padx=5, ipady=10)
+        # Filter button container
+        filter_buttons = ttk.Frame(filters_content, style='Card.TFrame')
+        filter_buttons.pack(fill="x")
 
-        button_glow = ttk.Button(
-            self.inner_pannel_drop, text="Glow",
-            width=7, cursor="hand2", command=lambda: self.set_filter(FILTER_GLOW)
-        )
-        button_glow.grid(row=4, column=0, padx=5, ipady=10)
+        filter_items = [
+            ("All Items", ITEM_TYPES),
+            ("Currency", FILTER_CURRENCY),
+            ("Ashes", FILTER_ASHES),
+            ("Compass", FILTER_COMPASS),
+            ("Glow", FILTER_GLOW),
+            ("Others", FILTER_OTHERS)
+        ]
 
-        button_others = ttk.Button(
-            self.inner_pannel_drop, text="Others",
-            width=7, cursor="hand2", command=lambda: self.set_filter(FILTER_OTHERS)
-        )
-        button_others.grid(row=5, column=0, padx=5, ipady=10)
+        for text, filter_type in filter_items:
+            btn = ttk.Button(
+                filter_buttons, text=text,
+                style='Secondary.TButton',
+                cursor="hand2",
+                command=lambda f=filter_type: self.set_filter(f)
+            )
+            btn.pack(fill="x", pady=3)
 
         self.inner_pannel_drop.protocol("WM_DELETE_WINDOW", self.inner_pannel_drop.withdraw)
 
     def _create_settings_window(self) -> None:
         """Create the settings window."""
         self.inner_pannel_settings = tk.Toplevel(self)
-        self.inner_pannel_settings.title("Settings")
+        self.inner_pannel_settings.title("Settings - FurTorch")
         self.inner_pannel_settings.resizable(False, False)
         self.inner_pannel_settings.attributes('-toolwindow', True)
         self.inner_pannel_settings.attributes('-topmost', True)
+        self.inner_pannel_settings.configure(bg=self.colors['bg_primary'])
         self.inner_pannel_settings.withdraw()
 
-        # Tax setting
-        label_tax = ttk.Label(self.inner_pannel_settings, text="Tax:")
-        label_tax.grid(row=0, column=0, padx=5, pady=5)
+        # Main container
+        main_frame = ttk.Frame(self.inner_pannel_settings)
+        main_frame.pack(fill="both", expand=True, padx=15, pady=15)
+
+        # Tax settings card
+        tax_card = ttk.Frame(main_frame, style='Card.TFrame')
+        tax_card.pack(fill="x", pady=(0, 15))
+
+        tax_content = ttk.Frame(tax_card, style='Card.TFrame')
+        tax_content.pack(fill="x", padx=15, pady=15)
+
+        tax_title = ttk.Label(
+            tax_content, text="TAX SETTINGS",
+            style='Status.TLabel'
+        )
+        tax_title.pack(side="top", anchor="w", pady=(0, 10))
+
+        tax_row = ttk.Frame(tax_content, style='Card.TFrame')
+        tax_row.pack(fill="x")
+
+        label_tax = ttk.Label(tax_row, text="Price Calculation:", style='TLabel')
+        label_tax.pack(side="left", padx=(0, 10))
 
         config = self.config_manager.get()
         self.chose = ttk.Combobox(
-            self.inner_pannel_settings,
+            tax_row,
             values=["No tax", "Include tax"],
-            state="readonly"
+            state="readonly",
+            width=15
         )
         self.chose.current(config.tax)
-        self.chose.grid(row=0, column=1, padx=5, pady=5)
+        self.chose.pack(side="left")
         self.chose.bind("<<ComboboxSelected>>", lambda e: self.change_tax(self.chose.current()))
 
-        # Opacity setting
-        label_opacity = ttk.Label(self.inner_pannel_settings, text="Opacity:")
-        label_opacity.grid(row=1, column=0, padx=5, pady=5)
+        # Opacity settings card
+        opacity_card = ttk.Frame(main_frame, style='Card.TFrame')
+        opacity_card.pack(fill="x", pady=(0, 15))
+
+        opacity_content = ttk.Frame(opacity_card, style='Card.TFrame')
+        opacity_content.pack(fill="x", padx=15, pady=15)
+
+        opacity_title = ttk.Label(
+            opacity_content, text="WINDOW OPACITY",
+            style='Status.TLabel'
+        )
+        opacity_title.pack(side="top", anchor="w", pady=(0, 10))
+
+        opacity_row = ttk.Frame(opacity_content, style='Card.TFrame')
+        opacity_row.pack(fill="x")
+
+        label_opacity = ttk.Label(opacity_row, text="Transparency:", style='TLabel')
+        label_opacity.pack(side="left", padx=(0, 10))
 
         self.scale_opacity = ttk.Scale(
-            self.inner_pannel_settings,
+            opacity_row,
             from_=0.1, to=1.0, orient=tk.HORIZONTAL,
-            command=self.change_opacity
+            command=self.change_opacity,
+            length=200
         )
-        self.scale_opacity.grid(row=1, column=1, padx=5, pady=5)
+        self.scale_opacity.pack(side="left", fill="x", expand=True)
         self.scale_opacity.set(config.opacity)
 
-        # Reset button
+        # Actions card
+        actions_card = ttk.Frame(main_frame, style='Card.TFrame')
+        actions_card.pack(fill="x", pady=0)
+
+        actions_content = ttk.Frame(actions_card, style='Card.TFrame')
+        actions_content.pack(fill="x", padx=15, pady=15)
+
+        actions_title = ttk.Label(
+            actions_content, text="ACTIONS",
+            style='Status.TLabel'
+        )
+        actions_title.pack(side="top", anchor="w", pady=(0, 10))
+
         reset_button = ttk.Button(
-            self.inner_pannel_settings,
-            text="Reset Tracking",
+            actions_content,
+            text="Reset Tracking Data",
+            style='Danger.TButton',
+            cursor="hand2",
             command=self.reset_tracking
         )
-        reset_button.grid(row=2, column=0, columnspan=2, padx=5, pady=10)
+        reset_button.pack(fill="x")
 
         self.inner_pannel_settings.protocol("WM_DELETE_WINDOW", self.inner_pannel_settings.withdraw)
 
@@ -336,7 +605,7 @@ class TrackerApp(tk.Tk):
         if self.inventory_tracker.start_initialization():
             self.label_initialize_status.config(
                 text="Waiting for bag update...",
-                foreground="blue"
+                foreground=self.colors['warning']
             )
             self.button_initialize.config(state="disabled")
 
@@ -360,8 +629,8 @@ class TrackerApp(tk.Tk):
             item_count: Number of unique items initialized.
         """
         self.label_initialize_status.config(
-            text=f"Initialized {item_count} items",
-            foreground="green"
+            text=f"✓ Initialized ({item_count} items)",
+            foreground=self.colors['success']
         )
         self.button_initialize.config(state="normal")
 
@@ -393,10 +662,10 @@ class TrackerApp(tk.Tk):
             self.inventory_tracker.reset()
             self.statistics_tracker.reset()
 
-            self.label_current_earn.config(text="🔥 0")
-            self.label_map_count.config(text="🎫 0")
+            self.label_current_earn.config(text="🔥 0 total")
+            self.label_map_count.config(text="🎫 0 maps")
             self.inner_pannel_drop_listbox.delete(1, END)
-            self.label_initialize_status.config(text="Not initialized")
+            self.label_initialize_status.config(text="Not initialized", foreground=self.colors['text_secondary'])
 
             messagebox.showinfo("Reset Complete", "All tracking data has been reset.")
 
@@ -492,13 +761,13 @@ class TrackerApp(tk.Tk):
         # Get appropriate drop list
         if self.show_all:
             stats = self.statistics_tracker.get_total_stats()
-            self.label_current_earn.config(text=f"🔥 {round(stats['income'], 2)}")
+            self.label_current_earn.config(text=f"🔥 {round(stats['income'], 2)} total")
         else:
             stats = self.statistics_tracker.get_current_map_stats()
-            self.label_current_earn.config(text=f"🔥 {round(stats['income'], 2)}")
+            self.label_current_earn.config(text=f"🔥 {round(stats['income'], 2)} total")
 
         total_stats = self.statistics_tracker.get_total_stats()
-        self.label_map_count.config(text=f"🎫 {total_stats['map_count']}")
+        self.label_map_count.config(text=f"🎫 {total_stats['map_count']} maps")
 
         # Update drop listbox
         self.inner_pannel_drop_listbox.delete(1, END)
@@ -545,7 +814,7 @@ class TrackerApp(tk.Tk):
 
             m = int(duration // 60)
             s = int(duration % 60)
-            self.label_current_time.config(text=f"Current: {m}m{s}s")
+            self.label_current_time.config(text=f"⏱ {m}m{s:02d}s")
 
             income_per_min = current_stats['income_per_minute']
             self.label_current_speed.config(text=f"🔥 {round(income_per_min, 2)} /min")
@@ -554,7 +823,7 @@ class TrackerApp(tk.Tk):
         duration = total_stats['duration']
         m = int(duration // 60)
         s = int(duration % 60)
-        self.label_total_time.config(text=f"Total: {m}m{s}s")
+        self.label_total_time.config(text=f"⏱ {m}m{s:02d}s")
 
         income_per_min = total_stats['income_per_minute']
         self.label_total_speed.config(text=f"🔥 {round(income_per_min, 2)} /min")
