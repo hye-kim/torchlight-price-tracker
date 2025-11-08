@@ -42,6 +42,7 @@ ITEM_TYPES: List[str] = [
     "Tower Material",
     "BOSS Ticket",
     "Memory Glow",
+    "Memory Fluorescence",
     "Divine Emblem",
     "Overlap Material",
     "Hard Currency"
