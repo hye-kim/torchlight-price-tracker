@@ -47,15 +47,19 @@ from src.inventory_tracker import InventoryTracker
 from src.statistics_tracker import StatisticsTracker
 from src.game_detector import GameDetector
 
-# Setup logging
+# Setup logging with UTF-8 encoding to handle Unicode characters
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('tracker.log'),
-        logging.StreamHandler()
+        logging.FileHandler('tracker.log', encoding='utf-8'),
+        logging.StreamHandler(sys.stdout)
     ]
 )
+# Set the StreamHandler to use UTF-8 encoding
+for handler in logging.root.handlers:
+    if isinstance(handler, logging.StreamHandler) and handler.stream == sys.stdout:
+        handler.stream.reconfigure(encoding='utf-8')
 logger = logging.getLogger(__name__)
 
 
