@@ -5,9 +5,9 @@ Constants used throughout the Torchlight Infinite Price Tracker application.
 from typing import List
 
 # Application Information
-APP_NAME = "FurTorch"
+APP_NAME = "Torchlight Price Chcker"
 APP_VERSION = "0.0.3"
-APP_TITLE = f"{APP_NAME} v{APP_VERSION} - English (Improved)"
+APP_TITLE = f"{APP_NAME} v{APP_VERSION}"
 
 # File Paths
 CONFIG_FILE = "config.json"
