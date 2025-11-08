@@ -1,17 +1,23 @@
 """
-Torchlight Infinite Profit Tracker - Improved Version
+Torchlight Infinite Profit Tracker - PyQt5 Version
 
-This is a refactored version with better code organization, error handling,
+This is a refactored version using PyQt5 with better code organization, error handling,
 type hints, logging, and thread safety.
 """
 
 import logging
 import time
 import threading
-import tkinter as tk
-from tkinter import messagebox, ttk, StringVar, Listbox, END
 from typing import Optional, Dict, Any
 import ctypes
+import sys
+
+from PyQt5.QtWidgets import (
+    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
+    QLabel, QPushButton, QListWidget, QComboBox, QMessageBox, QDialog, QFrame
+)
+from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QObject
+from PyQt5.QtGui import QFont
 
 from src.constants import (
     APP_TITLE,
@@ -53,7 +59,14 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-class TrackerApp(tk.Tk):
+class WorkerSignals(QObject):
+    """Signals for worker thread communication."""
+    initialization_complete = pyqtSignal(int)
+    update_display = pyqtSignal()
+    reshow_drops = pyqtSignal()
+
+
+class TrackerApp(QMainWindow):
     """Main application window for the Torchlight Infinite Price Tracker."""
 
     def __init__(
@@ -86,397 +99,393 @@ class TrackerApp(tk.Tk):
         self.show_all = False
         self.current_show_types = ITEM_TYPES.copy()
 
-        self._setup_window()
-        self._create_widgets()
+        # Worker signals for thread-safe UI updates
+        self.signals = WorkerSignals()
+        self.signals.initialization_complete.connect(self.on_initialization_complete)
+        self.signals.update_display.connect(self.update_display)
+        self.signals.reshow_drops.connect(self.reshow)
 
-        self.protocol("WM_DELETE_WINDOW", self.exit_app)
-
-    def _setup_window(self) -> None:
-        """Setup the main window properties."""
-        self.title(APP_TITLE)
-
-        # DPI awareness for Windows
-        try:
-            ctypes.windll.shcore.SetProcessDpiAwareness(1)
-            scale_factor = ctypes.windll.shcore.GetScaleFactorForDevice(0)
-            self.tk.call('tk', 'scaling', scale_factor / 75)
-        except Exception as e:
-            logger.warning(f"Could not set DPI awareness: {e}")
-
-        self.resizable(False, False)
-        self.attributes('-toolwindow', True)
-        self.attributes('-topmost', True)
-
-        # Apply modern theme
-        self._apply_modern_theme()
-
-    def _apply_modern_theme(self) -> None:
-        """Apply modern color scheme and styling to the UI."""
-        # Modern color palette
+        # Initialize color palette
         self.colors = {
-            'bg_primary': '#1e1e2e',      # Dark background
-            'bg_secondary': '#2a2a3e',    # Slightly lighter background
-            'bg_tertiary': '#363650',     # Card/section background
-            'accent': '#8b5cf6',          # Purple accent
-            'accent_hover': '#9d70f7',    # Lighter purple for hover
-            'success': '#10b981',         # Green for success
-            'warning': '#f59e0b',         # Orange for warning
-            'error': '#ef4444',           # Red for error
-            'text_primary': '#e2e8f0',    # Light text
-            'text_secondary': '#94a3b8',  # Muted text
-            'border': '#4a4a5e',          # Border color
+            'bg_primary': '#1e1e2e',
+            'bg_secondary': '#2a2a3e',
+            'bg_tertiary': '#363650',
+            'accent': '#8b5cf6',
+            'accent_hover': '#9d70f7',
+            'success': '#10b981',
+            'warning': '#f59e0b',
+            'error': '#ef4444',
+            'text_primary': '#e2e8f0',
+            'text_secondary': '#94a3b8',
+            'border': '#4a4a5e',
         }
 
-        # Configure main window background
-        self.configure(bg=self.colors['bg_primary'])
+        self._setup_window()
+        self._apply_stylesheet()
+        self._create_widgets()
 
-        # Create custom ttk style
-        self.style = ttk.Style()
-        self.style.theme_use('clam')  # Use clam as base theme for customization
-
-        # Configure TFrame
-        self.style.configure(
-            'TFrame',
-            background=self.colors['bg_primary']
-        )
-
-        # Configure Card Frame (for sections)
-        self.style.configure(
-            'Card.TFrame',
-            background=self.colors['bg_tertiary'],
-            relief='flat',
-            borderwidth=0
-        )
-
-        # Configure TLabel
-        self.style.configure(
-            'TLabel',
-            background=self.colors['bg_primary'],
-            foreground=self.colors['text_primary'],
-            font=('Segoe UI', 11)
-        )
-
-        # Configure Header labels (larger stats)
-        self.style.configure(
-            'Header.TLabel',
-            background=self.colors['bg_tertiary'],
-            foreground=self.colors['text_primary'],
-            font=('Segoe UI', 13, 'bold'),
-            padding=5
-        )
-
-        # Configure Status labels
-        self.style.configure(
-            'Status.TLabel',
-            background=self.colors['bg_tertiary'],
-            foreground=self.colors['text_secondary'],
-            font=('Segoe UI', 9)
-        )
-
-        # Configure TButton
-        self.style.configure(
-            'TButton',
-            background=self.colors['accent'],
-            foreground=self.colors['text_primary'],
-            borderwidth=0,
-            relief='flat',
-            padding=(15, 8),
-            font=('Segoe UI', 10, 'bold')
-        )
-
-        self.style.map('TButton',
-            background=[('active', self.colors['accent_hover']),
-                       ('pressed', self.colors['accent'])],
-            foreground=[('active', self.colors['text_primary'])]
-        )
-
-        # Configure Secondary buttons
-        self.style.configure(
-            'Secondary.TButton',
-            background=self.colors['bg_secondary'],
-            foreground=self.colors['text_primary'],
-            borderwidth=1,
-            relief='flat',
-            padding=(12, 6),
-            font=('Segoe UI', 9)
-        )
-
-        self.style.map('Secondary.TButton',
-            background=[('active', self.colors['bg_tertiary']),
-                       ('pressed', self.colors['bg_secondary'])],
-            bordercolor=[('focus', self.colors['accent'])]
-        )
-
-        # Configure Exit button (danger style)
-        self.style.configure(
-            'Danger.TButton',
-            background=self.colors['error'],
-            foreground=self.colors['text_primary'],
-            borderwidth=0,
-            relief='flat',
-            padding=(15, 8),
-            font=('Segoe UI', 10, 'bold')
-        )
-
-        self.style.map('Danger.TButton',
-            background=[('active', '#dc2626'),
-                       ('pressed', self.colors['error'])]
-        )
-
-        # Configure TScrollbar
-        self.style.configure(
-            'Vertical.TScrollbar',
-            background=self.colors['bg_secondary'],
-            troughcolor=self.colors['bg_primary'],
-            borderwidth=0,
-            arrowsize=12
-        )
-
-    def _create_widgets(self) -> None:
-        """Create all GUI widgets."""
-        # Main container with padding
-        main_container = ttk.Frame(self)
-        main_container.pack(fill="both", expand=True, padx=10, pady=10)
-
-        # Stats card frame
-        stats_card = ttk.Frame(main_container, style='Card.TFrame')
-        stats_card.pack(fill="both", padx=0, pady=(0, 10))
-
-        # Stats frame inside card
-        stats_frame = ttk.Frame(stats_card, style='Card.TFrame')
-        stats_frame.pack(fill="both", padx=15, pady=15)
-
-        # Current map stats (row 0)
-        current_label = ttk.Label(
-            stats_frame, text="CURRENT MAP",
-            style='Status.TLabel'
-        )
-        current_label.grid(row=0, column=0, columnspan=3, sticky="w", pady=(0, 5))
-
-        self.label_current_time = ttk.Label(
-            stats_frame, text="⏱ 0m00s",
-            style='Header.TLabel'
-        )
-        self.label_current_time.grid(row=1, column=0, padx=(0, 15), sticky="w")
-
-        self.label_current_speed = ttk.Label(
-            stats_frame, text="🔥 0 /min",
-            style='Header.TLabel'
-        )
-        self.label_current_speed.grid(row=1, column=1, padx=(0, 15), sticky="w")
-
-        self.label_map_count = ttk.Label(
-            stats_frame, text="🎫 0 maps",
-            style='Header.TLabel'
-        )
-        self.label_map_count.grid(row=1, column=2, sticky="w")
-
-        # Separator
-        separator1 = ttk.Frame(stats_frame, height=1, style='Card.TFrame')
-        separator1.grid(row=2, column=0, columnspan=3, sticky="ew", pady=10)
-
-        # Total stats (row 3)
-        total_label = ttk.Label(
-            stats_frame, text="TOTAL SESSION",
-            style='Status.TLabel'
-        )
-        total_label.grid(row=3, column=0, columnspan=3, sticky="w", pady=(0, 5))
-
-        self.label_total_time = ttk.Label(
-            stats_frame, text="⏱ 0m00s",
-            style='Header.TLabel'
-        )
-        self.label_total_time.grid(row=4, column=0, padx=(0, 15), sticky="w")
-
-        self.label_total_speed = ttk.Label(
-            stats_frame, text="🔥 0 /min",
-            style='Header.TLabel'
-        )
-        self.label_total_speed.grid(row=4, column=1, padx=(0, 15), sticky="w")
-
-        self.label_current_earn = ttk.Label(
-            stats_frame, text="🔥 0 total",
-            style='Header.TLabel'
-        )
-        self.label_current_earn.grid(row=4, column=2, sticky="w")
-
-        # Control panel frame
-        control_frame = ttk.Frame(main_container, style='Card.TFrame')
-        control_frame.pack(fill="both", padx=0, pady=(0, 10))
-
-        # Control buttons inside card
-        controls = ttk.Frame(control_frame, style='Card.TFrame')
-        controls.pack(fill="both", padx=15, pady=15)
-
-        # Initialize section
-        init_label = ttk.Label(
-            controls, text="INITIALIZATION",
-            style='Status.TLabel'
-        )
-        init_label.grid(row=0, column=0, columnspan=2, sticky="w", pady=(0, 8))
-
-        self.button_initialize = ttk.Button(
-            controls, text="Initialize Tracker",
-            cursor="hand2", command=self.start_initialization
-        )
-        self.button_initialize.grid(row=1, column=0, sticky="ew", padx=(0, 10))
-
-        self.label_initialize_status = ttk.Label(
-            controls, text="Not initialized",
-            style='Status.TLabel'
-        )
-        self.label_initialize_status.grid(row=1, column=1, sticky="w")
-
-        # Separator
-        separator2 = ttk.Frame(controls, height=1, style='Card.TFrame')
-        separator2.grid(row=2, column=0, columnspan=2, sticky="ew", pady=12)
-
-        # Action buttons
-        action_label = ttk.Label(
-            controls, text="ACTIONS",
-            style='Status.TLabel'
-        )
-        action_label.grid(row=3, column=0, columnspan=2, sticky="w", pady=(0, 8))
-
-        button_frame = ttk.Frame(controls, style='Card.TFrame')
-        button_frame.grid(row=4, column=0, columnspan=2, sticky="ew")
-
-        button_exit = ttk.Button(
-            button_frame, text="Exit",
-            style='Danger.TButton',
-            cursor="hand2", command=self.exit_app
-        )
-        button_settings = ttk.Button(
-            button_frame, text="⚙ Settings",
-            style='Secondary.TButton',
-            cursor="hand2", command=self.show_settings_window
-        )
-        button_settings.pack(side="right", padx=(5, 0))
-
-        button_drops = ttk.Button(
-            button_frame, text="📋 Drops Detail",
-            style='Secondary.TButton',
-            cursor="hand2", command=self.show_drops_window
-        )
-        button_drops.pack(side="right", padx=(5, 0))
-
-        button_log = ttk.Button(
-            button_frame, text="🔍 Debug Log",
-            style='Secondary.TButton',
-            cursor="hand2", command=self.debug_log_format
-        )
-        button_log.pack(side="left")
-
-        # Drops card frame
-        drops_card = ttk.Frame(main_container, style='Card.TFrame')
-        drops_card.pack(fill="both", expand=True, padx=0, pady=0)
-
-        # Drops header
-        drops_header = ttk.Frame(drops_card, style='Card.TFrame')
-        drops_header.pack(fill="x", padx=15, pady=(15, 10))
-
-        drops_title = ttk.Label(
-            drops_header, text="RECENT DROPS",
-            style='Status.TLabel'
-        )
-        drops_title.pack(side="left")
-
-        self.words_short = StringVar()
-        self.words_short.set("Current Map")
-        button_change = ttk.Button(
-            drops_header,
-            textvariable=self.words_short,
-            style='Secondary.TButton',
-            cursor="hand2", command=self.change_states
-        )
-        button_change.pack(side="right")
-
-        # Drops list container
-        drops_container = ttk.Frame(drops_card, style='Card.TFrame')
-        drops_container.pack(fill="both", expand=True, padx=15, pady=(0, 15))
-
-        # Styled listbox
-        self.inner_pannel_drop_listbox = Listbox(
-            drops_container,
-            height=UI_LISTBOX_HEIGHT,
-            width=UI_LISTBOX_WIDTH,
-            font=('Segoe UI', 10),
-            bg=self.colors['bg_secondary'],
-            fg=self.colors['text_primary'],
-            selectbackground=self.colors['accent'],
-            selectforeground=self.colors['text_primary'],
-            borderwidth=0,
-            highlightthickness=0,
-            relief='flat'
-        )
-        self.inner_pannel_drop_listbox.insert(END, "Drops will be displayed here...")
-        self.inner_pannel_drop_listbox.pack(side="left", fill="both", expand=True)
-
-        inner_pannel_drop_scroll = ttk.Scrollbar(
-            drops_container,
-            command=self.inner_pannel_drop_listbox.yview,
-            orient="vertical"
-        )
-        inner_pannel_drop_scroll.pack(side="right", fill="y")
-        self.inner_pannel_drop_listbox.config(yscrollcommand=inner_pannel_drop_scroll.set)
-
-        # Create popup windows
+        # Create dialog windows
         self._create_drops_window()
         self._create_settings_window()
 
+    def _setup_window(self) -> None:
+        """Setup the main window properties."""
+        self.setWindowTitle(APP_TITLE)
+        self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.Tool)
+
+        # Set fixed size (non-resizable)
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
+
+    def _apply_stylesheet(self) -> None:
+        """Apply Qt Style Sheet for modern dark theme."""
+        stylesheet = f"""
+            QMainWindow {{
+                background-color: {self.colors['bg_primary']};
+            }}
+
+            QWidget {{
+                background-color: {self.colors['bg_primary']};
+                color: {self.colors['text_primary']};
+                font-family: 'Segoe UI';
+                font-size: 11pt;
+            }}
+
+            QFrame.card {{
+                background-color: {self.colors['bg_tertiary']};
+                border-radius: 8px;
+                padding: 15px;
+            }}
+
+            QLabel {{
+                color: {self.colors['text_primary']};
+                background-color: transparent;
+            }}
+
+            QLabel.header {{
+                font-size: 13pt;
+                font-weight: bold;
+                color: {self.colors['text_primary']};
+                padding: 5px;
+            }}
+
+            QLabel.status {{
+                font-size: 9pt;
+                color: {self.colors['text_secondary']};
+            }}
+
+            QPushButton {{
+                background-color: {self.colors['accent']};
+                color: {self.colors['text_primary']};
+                border: none;
+                border-radius: 6px;
+                padding: 8px 15px;
+                font-weight: bold;
+                font-size: 10pt;
+            }}
+
+            QPushButton:hover {{
+                background-color: {self.colors['accent_hover']};
+            }}
+
+            QPushButton:pressed {{
+                background-color: {self.colors['accent']};
+            }}
+
+            QPushButton.secondary {{
+                background-color: {self.colors['bg_secondary']};
+                color: {self.colors['text_primary']};
+                padding: 6px 12px;
+                font-size: 9pt;
+                font-weight: normal;
+            }}
+
+            QPushButton.secondary:hover {{
+                background-color: {self.colors['bg_tertiary']};
+            }}
+
+            QPushButton.danger {{
+                background-color: {self.colors['error']};
+                color: {self.colors['text_primary']};
+            }}
+
+            QPushButton.danger:hover {{
+                background-color: #dc2626;
+            }}
+
+            QPushButton:disabled {{
+                background-color: {self.colors['bg_secondary']};
+                color: {self.colors['text_secondary']};
+            }}
+
+            QListWidget {{
+                background-color: {self.colors['bg_secondary']};
+                color: {self.colors['text_primary']};
+                border: none;
+                border-radius: 6px;
+                padding: 5px;
+                font-size: 10pt;
+            }}
+
+            QListWidget::item {{
+                padding: 5px;
+            }}
+
+            QListWidget::item:selected {{
+                background-color: {self.colors['accent']};
+                color: {self.colors['text_primary']};
+            }}
+
+            QComboBox {{
+                background-color: {self.colors['bg_secondary']};
+                color: {self.colors['text_primary']};
+                border: 1px solid {self.colors['border']};
+                border-radius: 4px;
+                padding: 5px 10px;
+                min-width: 150px;
+            }}
+
+            QComboBox:hover {{
+                border-color: {self.colors['accent']};
+            }}
+
+            QComboBox::drop-down {{
+                border: none;
+                width: 20px;
+            }}
+
+            QComboBox QAbstractItemView {{
+                background-color: {self.colors['bg_secondary']};
+                color: {self.colors['text_primary']};
+                selection-background-color: {self.colors['accent']};
+                border: 1px solid {self.colors['border']};
+            }}
+
+            QDialog {{
+                background-color: {self.colors['bg_primary']};
+            }}
+        """
+        self.setStyleSheet(stylesheet)
+
+    def _create_widgets(self) -> None:
+        """Create all GUI widgets."""
+        central_widget = self.centralWidget()
+        main_layout = QVBoxLayout(central_widget)
+        main_layout.setContentsMargins(10, 10, 10, 10)
+        main_layout.setSpacing(10)
+
+        # Stats card
+        stats_card = self._create_stats_card()
+        main_layout.addWidget(stats_card)
+
+        # Control panel
+        control_card = self._create_control_card()
+        main_layout.addWidget(control_card)
+
+        # Drops card
+        drops_card = self._create_drops_card()
+        main_layout.addWidget(drops_card)
+
+    def _create_stats_card(self) -> QFrame:
+        """Create the statistics display card."""
+        card = QFrame()
+        card.setProperty("class", "card")
+        card.setObjectName("card")
+
+        layout = QVBoxLayout(card)
+        layout.setContentsMargins(15, 15, 15, 15)
+        layout.setSpacing(10)
+
+        # Current map stats
+        current_label = QLabel("CURRENT MAP")
+        current_label.setProperty("class", "status")
+        layout.addWidget(current_label)
+
+        current_grid = QGridLayout()
+        current_grid.setSpacing(15)
+
+        self.label_current_time = QLabel("⏱ 0m00s")
+        self.label_current_time.setProperty("class", "header")
+        current_grid.addWidget(self.label_current_time, 0, 0)
+
+        self.label_current_speed = QLabel("🔥 0 /min")
+        self.label_current_speed.setProperty("class", "header")
+        current_grid.addWidget(self.label_current_speed, 0, 1)
+
+        self.label_map_count = QLabel("🎫 0 maps")
+        self.label_map_count.setProperty("class", "header")
+        current_grid.addWidget(self.label_map_count, 0, 2)
+
+        layout.addLayout(current_grid)
+
+        # Separator
+        separator = QFrame()
+        separator.setFrameShape(QFrame.HLine)
+        separator.setStyleSheet(f"background-color: {self.colors['border']}; max-height: 1px;")
+        layout.addWidget(separator)
+
+        # Total stats
+        total_label = QLabel("TOTAL SESSION")
+        total_label.setProperty("class", "status")
+        layout.addWidget(total_label)
+
+        total_grid = QGridLayout()
+        total_grid.setSpacing(15)
+
+        self.label_total_time = QLabel("⏱ 0m00s")
+        self.label_total_time.setProperty("class", "header")
+        total_grid.addWidget(self.label_total_time, 0, 0)
+
+        self.label_total_speed = QLabel("🔥 0 /min")
+        self.label_total_speed.setProperty("class", "header")
+        total_grid.addWidget(self.label_total_speed, 0, 1)
+
+        self.label_current_earn = QLabel("🔥 0 total")
+        self.label_current_earn.setProperty("class", "header")
+        total_grid.addWidget(self.label_current_earn, 0, 2)
+
+        layout.addLayout(total_grid)
+
+        return card
+
+    def _create_control_card(self) -> QFrame:
+        """Create the control panel card."""
+        card = QFrame()
+        card.setProperty("class", "card")
+
+        layout = QVBoxLayout(card)
+        layout.setContentsMargins(15, 15, 15, 15)
+        layout.setSpacing(10)
+
+        # Initialization section
+        init_label = QLabel("INITIALIZATION")
+        init_label.setProperty("class", "status")
+        layout.addWidget(init_label)
+
+        init_row = QHBoxLayout()
+        init_row.setSpacing(10)
+
+        self.button_initialize = QPushButton("Initialize Tracker")
+        self.button_initialize.setCursor(Qt.PointingHandCursor)
+        self.button_initialize.clicked.connect(self.start_initialization)
+        init_row.addWidget(self.button_initialize)
+
+        self.label_initialize_status = QLabel("Not initialized")
+        self.label_initialize_status.setProperty("class", "status")
+        init_row.addWidget(self.label_initialize_status)
+        init_row.addStretch()
+
+        layout.addLayout(init_row)
+
+        # Separator
+        separator = QFrame()
+        separator.setFrameShape(QFrame.HLine)
+        separator.setStyleSheet(f"background-color: {self.colors['border']}; max-height: 1px;")
+        layout.addWidget(separator)
+
+        # Actions section
+        actions_label = QLabel("ACTIONS")
+        actions_label.setProperty("class", "status")
+        layout.addWidget(actions_label)
+
+        button_row = QHBoxLayout()
+        button_row.setSpacing(5)
+
+        button_log = QPushButton("🔍 Debug Log")
+        button_log.setProperty("class", "secondary")
+        button_log.setCursor(Qt.PointingHandCursor)
+        button_log.clicked.connect(self.debug_log_format)
+        button_row.addWidget(button_log)
+
+        button_row.addStretch()
+
+        button_drops = QPushButton("📋 Drops Detail")
+        button_drops.setProperty("class", "secondary")
+        button_drops.setCursor(Qt.PointingHandCursor)
+        button_drops.clicked.connect(self.show_drops_window)
+        button_row.addWidget(button_drops)
+
+        button_settings = QPushButton("⚙ Settings")
+        button_settings.setProperty("class", "secondary")
+        button_settings.setCursor(Qt.PointingHandCursor)
+        button_settings.clicked.connect(self.show_settings_window)
+        button_row.addWidget(button_settings)
+
+        layout.addLayout(button_row)
+
+        return card
+
+    def _create_drops_card(self) -> QFrame:
+        """Create the drops display card."""
+        card = QFrame()
+        card.setProperty("class", "card")
+
+        layout = QVBoxLayout(card)
+        layout.setContentsMargins(15, 15, 15, 15)
+        layout.setSpacing(10)
+
+        # Header
+        header_layout = QHBoxLayout()
+
+        drops_title = QLabel("RECENT DROPS")
+        drops_title.setProperty("class", "status")
+        header_layout.addWidget(drops_title)
+
+        header_layout.addStretch()
+
+        self.button_change = QPushButton("Current Map")
+        self.button_change.setProperty("class", "secondary")
+        self.button_change.setCursor(Qt.PointingHandCursor)
+        self.button_change.clicked.connect(self.change_states)
+        header_layout.addWidget(self.button_change)
+
+        layout.addLayout(header_layout)
+
+        # Drops list
+        self.inner_pannel_drop_listbox = QListWidget()
+        self.inner_pannel_drop_listbox.setMinimumHeight(UI_LISTBOX_HEIGHT * 20)  # Approximate height
+        self.inner_pannel_drop_listbox.addItem("Drops will be displayed here...")
+        layout.addWidget(self.inner_pannel_drop_listbox)
+
+        return card
+
     def _create_drops_window(self) -> None:
-        """Create the drops detail window."""
-        self.inner_pannel_drop = tk.Toplevel(self)
-        self.inner_pannel_drop.title("Drops Detail - FurTorch")
-        self.inner_pannel_drop.resizable(False, False)
-        self.inner_pannel_drop.attributes('-toolwindow', True)
-        self.inner_pannel_drop.attributes('-topmost', True)
-        self.inner_pannel_drop.configure(bg=self.colors['bg_primary'])
-        self.inner_pannel_drop.withdraw()
+        """Create the drops detail dialog."""
+        self.drops_dialog = QDialog(self)
+        self.drops_dialog.setWindowTitle("Drops Detail - FurTorch")
+        self.drops_dialog.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.Tool)
+        self.drops_dialog.setModal(False)
 
-        # Main container
-        main_frame = ttk.Frame(self.inner_pannel_drop)
-        main_frame.pack(fill="both", expand=True, padx=15, pady=15)
+        layout = QVBoxLayout(self.drops_dialog)
+        layout.setContentsMargins(15, 15, 15, 15)
+        layout.setSpacing(15)
 
-        # Header section
-        header_frame = ttk.Frame(main_frame, style='Card.TFrame')
-        header_frame.pack(fill="x", pady=(0, 15))
+        # Header card
+        header_card = QFrame()
+        header_card.setProperty("class", "card")
+        header_layout = QVBoxLayout(header_card)
+        header_layout.setContentsMargins(15, 15, 15, 15)
 
-        header_content = ttk.Frame(header_frame, style='Card.TFrame')
-        header_content.pack(fill="x", padx=15, pady=15)
+        header_label = QLabel("DROP FILTERS")
+        header_label.setProperty("class", "status")
+        header_layout.addWidget(header_label)
 
-        header_label = ttk.Label(
-            header_content, text="DROP FILTERS",
-            style='Status.TLabel'
-        )
-        header_label.pack(side="top", anchor="w", pady=(0, 10))
+        self.button_toggle_all = QPushButton("Current: Current Map Drops (Click to toggle All Drops)")
+        self.button_toggle_all.setCursor(Qt.PointingHandCursor)
+        self.button_toggle_all.clicked.connect(self.change_states)
+        header_layout.addWidget(self.button_toggle_all)
 
-        # Toggle button
-        self.words = StringVar()
-        self.words.set("Current: Current Map Drops (Click to toggle All Drops)")
-        inner_pannel_drop_show_all = ttk.Button(
-            header_content,
-            textvariable=self.words,
-            cursor="hand2", command=self.change_states
-        )
-        inner_pannel_drop_show_all.pack(fill="x")
+        layout.addWidget(header_card)
 
-        # Filter buttons section
-        filters_frame = ttk.Frame(main_frame, style='Card.TFrame')
-        filters_frame.pack(fill="x", pady=0)
+        # Filter buttons card
+        filters_card = QFrame()
+        filters_card.setProperty("class", "card")
+        filters_layout = QVBoxLayout(filters_card)
+        filters_layout.setContentsMargins(15, 15, 15, 15)
 
-        filters_content = ttk.Frame(filters_frame, style='Card.TFrame')
-        filters_content.pack(fill="x", padx=15, pady=15)
-
-        filters_label = ttk.Label(
-            filters_content, text="ITEM CATEGORIES",
-            style='Status.TLabel'
-        )
-        filters_label.pack(side="top", anchor="w", pady=(0, 10))
-
-        # Filter button container
-        filter_buttons = ttk.Frame(filters_content, style='Card.TFrame')
-        filter_buttons.pack(fill="x")
+        filters_label = QLabel("ITEM CATEGORIES")
+        filters_label.setProperty("class", "status")
+        filters_layout.addWidget(filters_label)
 
         filter_items = [
             ("All Items", ITEM_TYPES),
@@ -488,101 +497,84 @@ class TrackerApp(tk.Tk):
         ]
 
         for text, filter_type in filter_items:
-            btn = ttk.Button(
-                filter_buttons, text=text,
-                style='Secondary.TButton',
-                cursor="hand2",
-                command=lambda f=filter_type: self.set_filter(f)
-            )
-            btn.pack(fill="x", pady=3)
+            btn = QPushButton(text)
+            btn.setProperty("class", "secondary")
+            btn.setCursor(Qt.PointingHandCursor)
+            btn.clicked.connect(lambda checked, f=filter_type: self.set_filter(f))
+            filters_layout.addWidget(btn)
 
-        self.inner_pannel_drop.protocol("WM_DELETE_WINDOW", self.inner_pannel_drop.withdraw)
+        layout.addWidget(filters_card)
 
     def _create_settings_window(self) -> None:
-        """Create the settings window."""
-        self.inner_pannel_settings = tk.Toplevel(self)
-        self.inner_pannel_settings.title("Settings - FurTorch")
-        self.inner_pannel_settings.resizable(False, False)
-        self.inner_pannel_settings.attributes('-toolwindow', True)
-        self.inner_pannel_settings.attributes('-topmost', True)
-        self.inner_pannel_settings.configure(bg=self.colors['bg_primary'])
-        self.inner_pannel_settings.withdraw()
+        """Create the settings dialog."""
+        self.settings_dialog = QDialog(self)
+        self.settings_dialog.setWindowTitle("Settings - FurTorch")
+        self.settings_dialog.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.Tool)
+        self.settings_dialog.setModal(False)
 
-        # Main container
-        main_frame = ttk.Frame(self.inner_pannel_settings)
-        main_frame.pack(fill="both", expand=True, padx=15, pady=15)
+        layout = QVBoxLayout(self.settings_dialog)
+        layout.setContentsMargins(15, 15, 15, 15)
+        layout.setSpacing(15)
 
         # Tax settings card
-        tax_card = ttk.Frame(main_frame, style='Card.TFrame')
-        tax_card.pack(fill="x", pady=(0, 15))
+        tax_card = QFrame()
+        tax_card.setProperty("class", "card")
+        tax_layout = QVBoxLayout(tax_card)
+        tax_layout.setContentsMargins(15, 15, 15, 15)
 
-        tax_content = ttk.Frame(tax_card, style='Card.TFrame')
-        tax_content.pack(fill="x", padx=15, pady=15)
+        tax_title = QLabel("TAX SETTINGS")
+        tax_title.setProperty("class", "status")
+        tax_layout.addWidget(tax_title)
 
-        tax_title = ttk.Label(
-            tax_content, text="TAX SETTINGS",
-            style='Status.TLabel'
-        )
-        tax_title.pack(side="top", anchor="w", pady=(0, 10))
-
-        tax_row = ttk.Frame(tax_content, style='Card.TFrame')
-        tax_row.pack(fill="x")
-
-        label_tax = ttk.Label(tax_row, text="Price Calculation:", style='TLabel')
-        label_tax.pack(side="left", padx=(0, 10))
+        tax_row = QHBoxLayout()
+        label_tax = QLabel("Price Calculation:")
+        tax_row.addWidget(label_tax)
 
         config = self.config_manager.get()
-        self.chose = ttk.Combobox(
-            tax_row,
-            values=["No tax", "Include tax"],
-            state="readonly",
-            width=15
-        )
-        self.chose.current(config.tax)
-        self.chose.pack(side="left")
-        self.chose.bind("<<ComboboxSelected>>", lambda e: self.change_tax(self.chose.current()))
+        self.tax_combo = QComboBox()
+        self.tax_combo.addItems(["No tax", "Include tax"])
+        self.tax_combo.setCurrentIndex(config.tax)
+        self.tax_combo.currentIndexChanged.connect(self.change_tax)
+        tax_row.addWidget(self.tax_combo)
+
+        tax_layout.addLayout(tax_row)
+        layout.addWidget(tax_card)
 
         # Actions card
-        actions_card = ttk.Frame(main_frame, style='Card.TFrame')
-        actions_card.pack(fill="x", pady=0)
+        actions_card = QFrame()
+        actions_card.setProperty("class", "card")
+        actions_layout = QVBoxLayout(actions_card)
+        actions_layout.setContentsMargins(15, 15, 15, 15)
 
-        actions_content = ttk.Frame(actions_card, style='Card.TFrame')
-        actions_content.pack(fill="x", padx=15, pady=15)
+        actions_title = QLabel("ACTIONS")
+        actions_title.setProperty("class", "status")
+        actions_layout.addWidget(actions_title)
 
-        actions_title = ttk.Label(
-            actions_content, text="ACTIONS",
-            style='Status.TLabel'
-        )
-        actions_title.pack(side="top", anchor="w", pady=(0, 10))
+        reset_button = QPushButton("Reset Statistics")
+        reset_button.setProperty("class", "danger")
+        reset_button.setCursor(Qt.PointingHandCursor)
+        reset_button.clicked.connect(self.reset_tracking)
+        actions_layout.addWidget(reset_button)
 
-        reset_button = ttk.Button(
-            actions_content,
-            text="Reset Statistics",
-            style='Danger.TButton',
-            cursor="hand2",
-            command=self.reset_tracking
-        )
-        reset_button.pack(fill="x")
-
-        self.inner_pannel_settings.protocol("WM_DELETE_WINDOW", self.inner_pannel_settings.withdraw)
+        layout.addWidget(actions_card)
 
     def start_initialization(self) -> None:
         """Start the inventory initialization process."""
         if self.inventory_tracker.start_initialization():
-            self.label_initialize_status.config(
-                text="Waiting for bag update...",
-                foreground=self.colors['warning']
-            )
-            self.button_initialize.config(state="disabled")
+            self.label_initialize_status.setText("Waiting for bag update...")
+            self.label_initialize_status.setStyleSheet(f"color: {self.colors['warning']};")
+            self.button_initialize.setEnabled(False)
 
-            messagebox.showinfo(
+            QMessageBox.information(
+                self,
                 "Initialization",
                 "Click 'OK' and then sort your bag in-game by clicking the sort button.\n\n"
                 "This will refresh your inventory and allow the tracker to initialize "
                 "with the correct item counts."
             )
         else:
-            messagebox.showinfo(
+            QMessageBox.information(
+                self,
                 "Initialization",
                 "Initialization already in progress. Please wait."
             )
@@ -594,48 +586,51 @@ class TrackerApp(tk.Tk):
         Args:
             item_count: Number of unique items initialized.
         """
-        self.label_initialize_status.config(
-            text=f"✓ Initialized ({item_count} items)",
-            foreground=self.colors['success']
+        self.label_initialize_status.setText(f"✓ Initialized ({item_count} items)")
+        self.label_initialize_status.setStyleSheet(f"color: {self.colors['success']};")
+        self.button_initialize.setEnabled(True)
+
+    def closeEvent(self, event) -> None:
+        """Handle window close event."""
+        reply = QMessageBox.question(
+            self,
+            "Exit",
+            "Are you sure you want to exit?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
         )
-        self.button_initialize.config(state="normal")
 
-    def exit_app(self) -> None:
-        """Exit the application gracefully."""
-        if messagebox.askyesno("Exit", "Are you sure you want to exit?"):
+        if reply == QMessageBox.Yes:
             self.app_running = False
-
-            try:
-                self.inner_pannel_drop.destroy()
-            except:
-                pass
-
-            try:
-                self.inner_pannel_settings.destroy()
-            except:
-                pass
-
-            self.destroy()
-            self.quit()
+            event.accept()
+        else:
+            event.ignore()
 
     def reset_tracking(self) -> None:
         """Reset tracking statistics while preserving inventory initialization."""
-        if messagebox.askyesno(
+        reply = QMessageBox.question(
+            self,
             "Reset Statistics",
             "Are you sure you want to reset all tracking statistics? "
             "This will clear all drop statistics and map counts.\n\n"
-            "Your inventory initialization will be preserved."
-        ):
-            # Reset statistics only, preserve inventory state
+            "Your inventory initialization will be preserved.",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+
+        if reply == QMessageBox.Yes:
             self.statistics_tracker.reset()
 
-            # Update UI to show reset state
-            self.label_current_earn.config(text="🔥 0 total")
-            self.label_map_count.config(text="🎫 0 maps")
-            self.inner_pannel_drop_listbox.delete(1, END)
-            # Don't reset initialization status - preserve it
+            # Update UI
+            self.label_current_earn.setText("🔥 0 total")
+            self.label_map_count.setText("🎫 0 maps")
+            self.inner_pannel_drop_listbox.clear()
 
-            messagebox.showinfo("Reset Complete", "Statistics have been reset. Inventory initialization preserved.")
+            QMessageBox.information(
+                self,
+                "Reset Complete",
+                "Statistics have been reset. Inventory initialization preserved."
+            )
 
     def change_tax(self, value: int) -> None:
         """
@@ -651,11 +646,11 @@ class TrackerApp(tk.Tk):
         """Toggle between current map and all drops view."""
         self.show_all = not self.show_all
         if not self.show_all:
-            self.words.set("Current: Current Map Drops (Click to toggle All Drops)")
-            self.words_short.set("Current Map")
+            self.button_toggle_all.setText("Current: Current Map Drops (Click to toggle All Drops)")
+            self.button_change.setText("Current Map")
         else:
-            self.words.set("Current: All Drops (Click to toggle Current Map Drops)")
-            self.words_short.set("All Drops")
+            self.button_toggle_all.setText("Current: All Drops (Click to toggle Current Map Drops)")
+            self.button_change.setText("All Drops")
         self.reshow()
 
     def set_filter(self, item_types: list) -> None:
@@ -670,17 +665,17 @@ class TrackerApp(tk.Tk):
 
     def show_drops_window(self) -> None:
         """Toggle the drops detail window."""
-        if self.inner_pannel_drop.state() == "withdrawn":
-            self.inner_pannel_drop.deiconify()
+        if self.drops_dialog.isVisible():
+            self.drops_dialog.hide()
         else:
-            self.inner_pannel_drop.withdraw()
+            self.drops_dialog.show()
 
     def show_settings_window(self) -> None:
         """Toggle the settings window."""
-        if self.inner_pannel_settings.state() == "withdrawn":
-            self.inner_pannel_settings.deiconify()
+        if self.settings_dialog.isVisible():
+            self.settings_dialog.hide()
         else:
-            self.inner_pannel_settings.withdraw()
+            self.settings_dialog.show()
 
     def debug_log_format(self) -> None:
         """Print debug information about current state."""
@@ -696,7 +691,8 @@ class TrackerApp(tk.Tk):
             name = full_table.get(item_id, {}).get("name", f"Unknown (ID: {item_id})")
             logger.info(f"  {name}: {total}")
 
-        messagebox.showinfo(
+        QMessageBox.information(
+            self,
             "Debug Information",
             f"Debug information has been logged.\n\n"
             f"Bag initialized: {self.inventory_tracker.bag_initialized}\n"
@@ -711,16 +707,16 @@ class TrackerApp(tk.Tk):
         # Get appropriate drop list
         if self.show_all:
             stats = self.statistics_tracker.get_total_stats()
-            self.label_current_earn.config(text=f"🔥 {round(stats['income'], 2)} total")
+            self.label_current_earn.setText(f"🔥 {round(stats['income'], 2)} total")
         else:
             stats = self.statistics_tracker.get_current_map_stats()
-            self.label_current_earn.config(text=f"🔥 {round(stats['income'], 2)} total")
+            self.label_current_earn.setText(f"🔥 {round(stats['income'], 2)} total")
 
         total_stats = self.statistics_tracker.get_total_stats()
-        self.label_map_count.config(text=f"🎫 {total_stats['map_count']} maps")
+        self.label_map_count.setText(f"🎫 {total_stats['map_count']} maps")
 
         # Update drop listbox
-        self.inner_pannel_drop_listbox.delete(1, END)
+        self.inner_pannel_drop_listbox.clear()
 
         for item_id, count in stats['drops'].items():
             if item_id not in full_table:
@@ -751,8 +747,7 @@ class TrackerApp(tk.Tk):
                 item_price = item_price * 0.875
 
             total_value = round(count * item_price, 2)
-            self.inner_pannel_drop_listbox.insert(
-                END,
+            self.inner_pannel_drop_listbox.addItem(
                 f"{status} {item_name} x{count} [{total_value}]"
             )
 
@@ -764,19 +759,19 @@ class TrackerApp(tk.Tk):
 
             m = int(duration // 60)
             s = int(duration % 60)
-            self.label_current_time.config(text=f"⏱ {m}m{s:02d}s")
+            self.label_current_time.setText(f"⏱ {m}m{s:02d}s")
 
             income_per_min = current_stats['income_per_minute']
-            self.label_current_speed.config(text=f"🔥 {round(income_per_min, 2)} /min")
+            self.label_current_speed.setText(f"🔥 {round(income_per_min, 2)} /min")
 
         total_stats = self.statistics_tracker.get_total_stats()
         duration = total_stats['duration']
         m = int(duration // 60)
         s = int(duration % 60)
-        self.label_total_time.config(text=f"⏱ {m}m{s:02d}s")
+        self.label_total_time.setText(f"⏱ {m}m{s:02d}s")
 
         income_per_min = total_stats['income_per_minute']
-        self.label_total_speed.config(text=f"🔥 {round(income_per_min, 2)} /min")
+        self.label_total_speed.setText(f"🔥 {round(income_per_min, 2)} /min")
 
 
 class LogMonitorThread(threading.Thread):
@@ -788,7 +783,8 @@ class LogMonitorThread(threading.Thread):
         log_file_path: Optional[str],
         log_parser: LogParser,
         inventory_tracker: InventoryTracker,
-        statistics_tracker: StatisticsTracker
+        statistics_tracker: StatisticsTracker,
+        signals: WorkerSignals
     ):
         """
         Initialize the log monitor thread.
@@ -799,6 +795,7 @@ class LogMonitorThread(threading.Thread):
             log_parser: Log parser instance.
             inventory_tracker: Inventory tracker instance.
             statistics_tracker: Statistics tracker instance.
+            signals: Worker signals for thread-safe UI updates.
         """
         super().__init__(daemon=True)
         self.app = app
@@ -806,6 +803,7 @@ class LogMonitorThread(threading.Thread):
         self.log_parser = log_parser
         self.inventory_tracker = inventory_tracker
         self.statistics_tracker = statistics_tracker
+        self.signals = signals
         self.log_file = None
 
     def run(self) -> None:
@@ -833,8 +831,8 @@ class LogMonitorThread(threading.Thread):
                     if text:
                         self._process_log_text(text)
 
-                # Update display
-                self.app.update_display()
+                # Update display via signal
+                self.signals.update_display.emit()
 
             except Exception as e:
                 logger.error(f"Error in log monitor thread: {e}", exc_info=True)
@@ -857,7 +855,7 @@ class LogMonitorThread(threading.Thread):
         if self.inventory_tracker.awaiting_initialization:
             success, item_count = self.inventory_tracker.process_initialization(text)
             if success:
-                self.app.after(0, lambda: self.app.on_initialization_complete(item_count))
+                self.signals.initialization_complete.emit(item_count)
 
         # Detect map changes
         entering_map, exiting_map = self.log_parser.detect_map_change(text)
@@ -873,7 +871,7 @@ class LogMonitorThread(threading.Thread):
         changes = self.inventory_tracker.scan_for_changes(text)
         if changes:
             self.statistics_tracker.process_item_changes(changes)
-            self.app.after(0, self.app.reshow)
+            self.signals.reshow_drops.emit()
 
             # If not in map but got changes, assume we're in a map
             if not self.statistics_tracker.is_in_map:
@@ -882,7 +880,10 @@ class LogMonitorThread(threading.Thread):
 
 def main():
     """Main entry point for the application."""
-    logger.info("=== Torchlight Infinite Price Tracker Starting ===")
+    logger.info("=== Torchlight Infinite Price Tracker Starting (PyQt5) ===")
+
+    # Create QApplication
+    app = QApplication(sys.argv)
 
     # Initialize managers
     config_manager = ConfigManager()
@@ -903,7 +904,7 @@ def main():
     game_found, log_file_path = game_detector.detect_game()
 
     # Create and run the application
-    app = TrackerApp(
+    tracker_app = TrackerApp(
         config_manager,
         file_manager,
         inventory_tracker,
@@ -911,10 +912,11 @@ def main():
         log_file_path
     )
 
-    # Show game not found warning after app is created (deferred)
+    # Show game not found warning after app is created
     if not game_found:
         logger.warning("Game not found - tracker will run without log monitoring")
-        app.after(100, lambda: messagebox.showwarning(
+        QTimer.singleShot(100, lambda: QMessageBox.warning(
+            tracker_app,
             "Game Not Found",
             "Could not find Torchlight: Infinite game process or log file.\n\n"
             "The tool will continue running but won't be able to track drops "
@@ -925,18 +927,23 @@ def main():
 
     # Start log monitoring thread
     monitor = LogMonitorThread(
-        app,
+        tracker_app,
         log_file_path,
         log_parser,
         inventory_tracker,
-        statistics_tracker
+        statistics_tracker,
+        tracker_app.signals
     )
     monitor.start()
 
+    # Show the window
+    tracker_app.show()
+
     # Run the application
     logger.info("Application started")
-    app.mainloop()
+    exit_code = app.exec_()
     logger.info("Application shut down")
+    sys.exit(exit_code)
 
 
 if __name__ == "__main__":
