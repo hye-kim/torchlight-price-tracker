@@ -1441,9 +1441,10 @@
     "338002": {
         "name": "Star Net",
         "type": "Special Item",
-        "price": 394.2,
-        "last_update": 1762492594.311722,
-        "from": "cf3ff756-db8b-4079-9ff0-2471bed892a2"
+        "price": 878.9667,
+        "last_update": 1762585765,
+        "from": "Local",
+        "last_time": 1762585765
     },
     "339001": {
         "name": "Inspiration Essence",
