@@ -401,8 +401,6 @@ class TrackerApp(QMainWindow):
         button_log.clicked.connect(self.debug_log_format)
         button_row.addWidget(button_log)
 
-        button_row.addStretch()
-
         button_drops = QPushButton("📋 Drops Detail")
         button_drops.setProperty("class", "secondary")
         button_drops.setCursor(Qt.PointingHandCursor)
