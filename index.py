@@ -210,6 +210,18 @@ class TrackerApp(QMainWindow):
                 background-color: {self.colors['bg_tertiary']};
             }}
 
+            QPushButton.filter-active {{
+                background-color: {self.colors['accent']};
+                color: {self.colors['text_primary']};
+                padding: 6px 12px;
+                font-size: 9pt;
+                font-weight: bold;
+            }}
+
+            QPushButton.filter-active:hover {{
+                background-color: {self.colors['accent_hover']};
+            }}
+
             QPushButton.danger {{
                 background-color: {self.colors['error']};
                 color: {self.colors['text_primary']};
@@ -454,23 +466,23 @@ class TrackerApp(QMainWindow):
         filter_row1 = QHBoxLayout()
         filter_row1.setSpacing(5)
 
-        btn_all = QPushButton("All")
-        btn_all.setProperty("class", "secondary")
-        btn_all.setCursor(Qt.PointingHandCursor)
-        btn_all.clicked.connect(lambda: self.set_filter(ITEM_TYPES))
-        filter_row1.addWidget(btn_all)
+        self.btn_filter_all = QPushButton("All")
+        self.btn_filter_all.setProperty("class", "filter-active")
+        self.btn_filter_all.setCursor(Qt.PointingHandCursor)
+        self.btn_filter_all.clicked.connect(lambda: self.set_filter(ITEM_TYPES))
+        filter_row1.addWidget(self.btn_filter_all)
 
-        btn_currency = QPushButton("Currency")
-        btn_currency.setProperty("class", "secondary")
-        btn_currency.setCursor(Qt.PointingHandCursor)
-        btn_currency.clicked.connect(lambda: self.set_filter(FILTER_CURRENCY))
-        filter_row1.addWidget(btn_currency)
+        self.btn_filter_currency = QPushButton("Currency")
+        self.btn_filter_currency.setProperty("class", "secondary")
+        self.btn_filter_currency.setCursor(Qt.PointingHandCursor)
+        self.btn_filter_currency.clicked.connect(lambda: self.set_filter(FILTER_CURRENCY))
+        filter_row1.addWidget(self.btn_filter_currency)
 
-        btn_embers = QPushButton("Embers")
-        btn_embers.setProperty("class", "secondary")
-        btn_embers.setCursor(Qt.PointingHandCursor)
-        btn_embers.clicked.connect(lambda: self.set_filter(FILTER_ASHES))
-        filter_row1.addWidget(btn_embers)
+        self.btn_filter_embers = QPushButton("Embers")
+        self.btn_filter_embers.setProperty("class", "secondary")
+        self.btn_filter_embers.setCursor(Qt.PointingHandCursor)
+        self.btn_filter_embers.clicked.connect(lambda: self.set_filter(FILTER_ASHES))
+        filter_row1.addWidget(self.btn_filter_embers)
 
         layout.addLayout(filter_row1)
 
@@ -478,25 +490,35 @@ class TrackerApp(QMainWindow):
         filter_row2 = QHBoxLayout()
         filter_row2.setSpacing(5)
 
-        btn_compass = QPushButton("Compass")
-        btn_compass.setProperty("class", "secondary")
-        btn_compass.setCursor(Qt.PointingHandCursor)
-        btn_compass.clicked.connect(lambda: self.set_filter(FILTER_COMPASS))
-        filter_row2.addWidget(btn_compass)
+        self.btn_filter_compass = QPushButton("Compass")
+        self.btn_filter_compass.setProperty("class", "secondary")
+        self.btn_filter_compass.setCursor(Qt.PointingHandCursor)
+        self.btn_filter_compass.clicked.connect(lambda: self.set_filter(FILTER_COMPASS))
+        filter_row2.addWidget(self.btn_filter_compass)
 
-        btn_memory = QPushButton("Memory")
-        btn_memory.setProperty("class", "secondary")
-        btn_memory.setCursor(Qt.PointingHandCursor)
-        btn_memory.clicked.connect(lambda: self.set_filter(FILTER_GLOW))
-        filter_row2.addWidget(btn_memory)
+        self.btn_filter_memory = QPushButton("Memory")
+        self.btn_filter_memory.setProperty("class", "secondary")
+        self.btn_filter_memory.setCursor(Qt.PointingHandCursor)
+        self.btn_filter_memory.clicked.connect(lambda: self.set_filter(FILTER_GLOW))
+        filter_row2.addWidget(self.btn_filter_memory)
 
-        btn_others = QPushButton("Others")
-        btn_others.setProperty("class", "secondary")
-        btn_others.setCursor(Qt.PointingHandCursor)
-        btn_others.clicked.connect(lambda: self.set_filter(FILTER_OTHERS))
-        filter_row2.addWidget(btn_others)
+        self.btn_filter_others = QPushButton("Others")
+        self.btn_filter_others.setProperty("class", "secondary")
+        self.btn_filter_others.setCursor(Qt.PointingHandCursor)
+        self.btn_filter_others.clicked.connect(lambda: self.set_filter(FILTER_OTHERS))
+        filter_row2.addWidget(self.btn_filter_others)
 
         layout.addLayout(filter_row2)
+
+        # Store filter buttons for easy access
+        self.filter_buttons = {
+            tuple(ITEM_TYPES): self.btn_filter_all,
+            tuple(FILTER_CURRENCY): self.btn_filter_currency,
+            tuple(FILTER_ASHES): self.btn_filter_embers,
+            tuple(FILTER_COMPASS): self.btn_filter_compass,
+            tuple(FILTER_GLOW): self.btn_filter_memory,
+            tuple(FILTER_OTHERS): self.btn_filter_others,
+        }
 
         # Drops list
         self.inner_pannel_drop_listbox = QListWidget()
@@ -733,6 +755,18 @@ class TrackerApp(QMainWindow):
             item_types: List of item types to display.
         """
         self.current_show_types = item_types
+
+        # Update button styling to show active filter
+        filter_key = tuple(item_types)
+        for key, button in self.filter_buttons.items():
+            if key == filter_key:
+                button.setProperty("class", "filter-active")
+            else:
+                button.setProperty("class", "secondary")
+            # Force style update
+            button.style().unpolish(button)
+            button.style().polish(button)
+
         self.reshow()
 
     def show_drops_window(self) -> None:
