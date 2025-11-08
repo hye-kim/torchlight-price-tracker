@@ -605,8 +605,23 @@ class TrackerApp(QMainWindow):
         )
 
         if reply == QMessageBox.Yes:
+            # Signal the app to stop
             self.app_running = False
+
+            # Close child dialogs
+            try:
+                self.drops_dialog.close()
+            except:
+                pass
+
+            try:
+                self.settings_dialog.close()
+            except:
+                pass
+
+            # Accept the event and quit the application
             event.accept()
+            QApplication.quit()
         else:
             event.ignore()
 
@@ -825,7 +840,11 @@ class LogMonitorThread(threading.Thread):
 
         while self.app.app_running:
             try:
-                time.sleep(LOG_POLL_INTERVAL)
+                # Sleep in smaller chunks to be more responsive to shutdown
+                for _ in range(int(LOG_POLL_INTERVAL * 10)):
+                    if not self.app.app_running:
+                        break
+                    time.sleep(0.1)
 
                 if not self.app.app_running:
                     break
