@@ -494,9 +494,9 @@ class TrackerApp(QMainWindow):
         filter_items = [
             ("All Items", ITEM_TYPES),
             ("Currency", FILTER_CURRENCY),
-            ("Ashes", FILTER_ASHES),
+            ("Embers", FILTER_ASHES),
             ("Compass", FILTER_COMPASS),
-            ("Glow", FILTER_GLOW),
+            ("Memory", FILTER_GLOW),
             ("Others", FILTER_OTHERS)
         ]
 
