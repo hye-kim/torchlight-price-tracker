@@ -35,16 +35,26 @@ ITEM_TYPES: List[str] = [
     "Memory Material",
     "Equipment Material",
     "Gameplay Ticket",
+    "Game Ticket",
     "Map Ticket",
     "Cube Material",
+    "Magic Cube Material",
+    "Magic Cube Materials",
     "Corruption Material",
+    "Corrosion Material",
+    "Erosion Material",
     "Dream Material",
     "Tower Material",
+    "Tower Materials",
     "BOSS Ticket",
+    "Boss Ticket",
     "Memory Glow",
     "Memory Fluorescence",
     "Divine Emblem",
+    "God's Emblem",
     "Overlap Material",
+    "Overlay Material",
+    "Remembrance Material",
     "Hard Currency"
 ]
 
@@ -57,14 +67,24 @@ FILTER_OTHERS = [
     "Special Item",
     "Memory Material",
     "Gameplay Ticket",
+    "Game Ticket",
     "Map Ticket",
     "Cube Material",
+    "Magic Cube Material",
+    "Magic Cube Materials",
     "Corruption Material",
+    "Corrosion Material",
+    "Erosion Material",
     "Dream Material",
     "Tower Material",
+    "Tower Materials",
     "BOSS Ticket",
+    "Boss Ticket",
     "Divine Emblem",
-    "Overlap Material"
+    "God's Emblem",
+    "Overlap Material",
+    "Overlay Material",
+    "Remembrance Material"
 ]
 
 # UI Configuration
