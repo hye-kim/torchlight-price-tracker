@@ -11,10 +11,12 @@ import threading
 from typing import Optional, Dict, Any
 import ctypes
 import sys
+from datetime import datetime
 
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
-    QLabel, QPushButton, QListWidget, QComboBox, QMessageBox, QDialog, QFrame
+    QLabel, QPushButton, QListWidget, QComboBox, QMessageBox, QDialog, QFrame,
+    QFileDialog
 )
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QObject
 from PyQt5.QtGui import QFont
@@ -407,6 +409,12 @@ class TrackerApp(QMainWindow):
         button_drops.clicked.connect(self.show_drops_window)
         button_row.addWidget(button_drops)
 
+        button_export = QPushButton("📊 Export")
+        button_export.setProperty("class", "secondary")
+        button_export.setCursor(Qt.PointingHandCursor)
+        button_export.clicked.connect(self.export_drops_to_excel)
+        button_row.addWidget(button_export)
+
         button_settings = QPushButton("⚙ Settings")
         button_settings.setProperty("class", "secondary")
         button_settings.setCursor(Qt.PointingHandCursor)
@@ -789,6 +797,173 @@ class TrackerApp(QMainWindow):
 
         income_per_min = total_stats['income_per_minute']
         self.label_total_speed.setText(f"🔥 {round(income_per_min, 2)} /min")
+
+    def export_drops_to_excel(self) -> None:
+        """Export drops to an Excel file sorted by item category."""
+        try:
+            from openpyxl import Workbook
+            from openpyxl.styles import Font, PatternFill, Alignment
+        except ImportError:
+            QMessageBox.warning(
+                self,
+                "Missing Dependency",
+                "The openpyxl library is not installed.\n\n"
+                "Please install it using: pip install openpyxl"
+            )
+            return
+
+        try:
+            # Get the appropriate drop list based on current view
+            if self.show_all:
+                stats = self.statistics_tracker.get_total_stats()
+                export_type = "All Drops"
+            else:
+                stats = self.statistics_tracker.get_current_map_stats()
+                export_type = "Current Map Drops"
+
+            drops = stats['drops']
+
+            if not drops:
+                QMessageBox.information(
+                    self,
+                    "No Drops",
+                    "There are no drops to export."
+                )
+                return
+
+            full_table = self.file_manager.load_full_table()
+
+            # Prepare data sorted by category
+            drop_data = []
+            for item_id, count in drops.items():
+                if item_id not in full_table:
+                    continue
+
+                item_data = full_table[item_id]
+                item_name = item_data.get("name", item_id)
+                item_type = item_data.get("type", "Unknown")
+                item_price = item_data.get("price", 0)
+
+                # Apply tax if enabled
+                if self.config_manager.is_tax_enabled() and item_id != EXCLUDED_ITEM_ID:
+                    item_price = item_price * 0.875
+
+                total_value = round(count * item_price, 2)
+
+                # Determine freshness status
+                now = time.time()
+                last_update = item_data.get("last_update", 0)
+                time_passed = now - last_update
+
+                if time_passed < TIME_FRESH_THRESHOLD:
+                    status = "Fresh"
+                elif time_passed < TIME_STALE_THRESHOLD:
+                    status = "Stale"
+                else:
+                    status = "Old"
+
+                drop_data.append({
+                    'category': item_type,
+                    'name': item_name,
+                    'count': count,
+                    'unit_price': round(item_price, 2),
+                    'total_value': total_value,
+                    'status': status
+                })
+
+            # Sort by category, then by total value descending
+            drop_data.sort(key=lambda x: (ITEM_TYPES.index(x['category']) if x['category'] in ITEM_TYPES else 999, -x['total_value']))
+
+            # Prompt user for save location
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            default_filename = f"torchlight_drops_{timestamp}.xlsx"
+
+            file_path, _ = QFileDialog.getSaveFileName(
+                self,
+                "Save Excel File",
+                default_filename,
+                "Excel Files (*.xlsx)"
+            )
+
+            if not file_path:
+                return  # User cancelled
+
+            # Create Excel workbook
+            wb = Workbook()
+            ws = wb.active
+            ws.title = "Drops Export"
+
+            # Define styles
+            header_font = Font(bold=True, size=12, color="FFFFFF")
+            header_fill = PatternFill(start_color="8b5cf6", end_color="8b5cf6", fill_type="solid")
+            category_font = Font(bold=True, size=11)
+            category_fill = PatternFill(start_color="2a2a3e", end_color="2a2a3e", fill_type="solid")
+
+            # Write metadata
+            ws.append([f"Torchlight Infinite Drops Export - {export_type}"])
+            ws.append([f"Export Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"])
+            ws.append([f"Total Income: {round(stats['income'], 2)}"])
+            ws.append([])  # Empty row
+
+            # Write headers
+            headers = ["Category", "Item Name", "Quantity", "Unit Price", "Total Value", "Price Status"]
+            ws.append(headers)
+
+            header_row = ws[ws.max_row]
+            for cell in header_row:
+                cell.font = header_font
+                cell.fill = header_fill
+                cell.alignment = Alignment(horizontal="center", vertical="center")
+
+            # Write data
+            current_category = None
+            for item in drop_data:
+                # Add category separator
+                if item['category'] != current_category:
+                    current_category = item['category']
+                    ws.append([])  # Empty row before new category
+
+                ws.append([
+                    item['category'],
+                    item['name'],
+                    item['count'],
+                    item['unit_price'],
+                    item['total_value'],
+                    item['status']
+                ])
+
+            # Auto-adjust column widths
+            for column in ws.columns:
+                max_length = 0
+                column_letter = column[0].column_letter
+                for cell in column:
+                    try:
+                        if len(str(cell.value)) > max_length:
+                            max_length = len(str(cell.value))
+                    except:
+                        pass
+                adjusted_width = min(max_length + 2, 50)
+                ws.column_dimensions[column_letter].width = adjusted_width
+
+            # Save the workbook
+            wb.save(file_path)
+
+            QMessageBox.information(
+                self,
+                "Export Successful",
+                f"Drops have been exported to:\n{file_path}\n\n"
+                f"Total items: {len(drop_data)}\n"
+                f"Total value: {round(stats['income'], 2)}"
+            )
+            logger.info(f"Drops exported to: {file_path}")
+
+        except Exception as e:
+            logger.error(f"Error exporting drops to Excel: {e}", exc_info=True)
+            QMessageBox.critical(
+                self,
+                "Export Error",
+                f"An error occurred while exporting:\n{str(e)}"
+            )
 
 
 class LogMonitorThread(threading.Thread):
