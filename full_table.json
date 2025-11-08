@@ -2,32 +2,34 @@
     "1001": {
         "name": "Sparks of Moth Fire",
         "type": "Memory Fluorescence",
-        "price": 7808.2857,
-        "last_update": 1762577501,
+        "price": 4229.5333,
+        "last_update": 1762584938,
         "from": "Local",
-        "last_time": 1762577501
+        "last_time": 1762584938
     },
     "1009": {
-        "name": "Long Four-Grid Copy Slate",
+        "name": "Space Rift",
         "type": "Magic Cube Material",
-        "price": 2413.533,
-        "last_update": 1762492594.311722,
-        "from": "40b477a9-c094-44e7-b375-5c82f45f4d75"
+        "price": 1235.5333,
+        "last_update": 1762584975,
+        "from": "Local",
+        "last_time": 1762584975
     },
     "1011": {
-        "name": "Return of the Stars",
+        "name": "Residence of Stars",
         "type": "Memory Fluorescence",
-        "price": 117.333,
-        "last_update": 1762492594.311722,
-        "from": "40b477a9-c094-44e7-b375-5c82f45f4d75"
+        "price": 480.7333,
+        "last_update": 1762584960,
+        "from": "Local",
+        "last_time": 1762584960
     },
     "1012": {
         "name": "When Sparks Set the Prairie Ablaze",
         "type": "Memory Fluorescence",
-        "price": 1360.5,
-        "last_update": 1762577639,
+        "price": 1479.4667,
+        "last_update": 1762584941,
         "from": "Local",
-        "last_time": 1762577639
+        "last_time": 1762584941
     },
     "5011": {
         "name": "Elixir of Oblivion",
@@ -38,7 +40,7 @@
         "last_time": 1762577912
     },
     "5028": {
-        "name": "Echoes from Another World",
+        "name": "Netherrealm Resonance",
         "type": "Hard Currency",
         "price": 0.1688,
         "last_update": 1762493666,
@@ -48,10 +50,10 @@
     "5029": {
         "name": "Winding Key",
         "type": "Hard Currency",
-        "price": 0.5706,
-        "last_update": 1762577896,
+        "price": 0.6305,
+        "last_update": 1762581670,
         "from": "Local",
-        "last_time": 1762577896
+        "last_time": 1762581670
     },
     "5030": {
         "name": "Twin Reflections",
@@ -76,58 +78,63 @@
         "from": "7c6efefd-68ea-4568-9d17-3e2b989f5bea"
     },
     "5140": {
-        "name": "Remembrance Fragments",
+        "name": "Memory Scrap",
         "type": "Remembrance Material",
-        "price": 0.021,
-        "last_update": 1762492594.311722,
-        "from": "FurryHeiLi",
-        "last_time": 1762445806
+        "price": 0.0114,
+        "last_update": 1762585053,
+        "from": "Local",
+        "last_time": 1762585053
     },
     "5143": {
-        "name": "Remembrance Gossamer - Rare",
+        "name": "Memory Thread - Rare",
         "type": "Remembrance Material",
-        "price": 0.024,
-        "last_update": 1762492594.311722,
-        "from": "e00d6b0b-8ede-482a-b343-bb52e243d078"
+        "price": 0.0468,
+        "last_update": 1762585043,
+        "from": "Local",
+        "last_time": 1762585043
     },
     "5144": {
-        "name": "Remembrance Gossamer - Excellent",
+        "name": "Memory Thread - Epic",
         "type": "Remembrance Material",
-        "price": 1.742,
-        "last_update": 1762492594.311722,
-        "from": "FurryHeiLi",
-        "last_time": 1762475530
+        "price": 1.8966,
+        "last_update": 1762585063,
+        "from": "Local",
+        "last_time": 1762585063
     },
     "5201": {
-        "name": "Godhead Fragment",
+        "name": "Divinity Fragment",
         "type": "Magic Cube Material",
-        "price": 0.007,
-        "last_update": 1762492594.311722,
-        "from": "57598325-0237-42f8-afc4-936430187aa4"
+        "price": 0.0082,
+        "last_update": 1762585005,
+        "from": "Local",
+        "last_time": 1762585005
     },
     "5202": {
-        "name": "Godhead Contract - Fragment",
+        "name": "Divinity Pact Fragment",
         "type": "Magic Cube Material",
-        "price": 316.8,
-        "last_update": 1762492594.311722,
-        "from": "24236ffc-b79c-41de-b44b-a55ceade2d28"
+        "price": 352.0,
+        "last_update": 1762585020,
+        "from": "Local",
+        "last_time": 1762585020
     },
     "5210": {
-        "name": "Divine Pyroxene",
+        "name": "Divinty Stone",
         "type": "Cube Material",
-        "price": 0.022,
-        "last_update": 1762492594.311722,
-        "from": "e780a367-0b93-49f5-b39a-85768657ba0d"
+        "price": 0.0229,
+        "last_update": 1762584856,
+        "from": "Local",
+        "last_time": 1762584856
     },
     "5220": {
-        "name": "Sublime Wedge (Magic)",
+        "name": "Transcendence Wedge (Magic)",
         "type": "Cube Material",
         "price": 0.019,
-        "last_update": 1762492594.311722,
-        "from": "e4b0f3e5-4125-4f8c-85c0-9e549dc38986"
+        "last_update": 1762584890,
+        "from": "Local",
+        "last_time": 1762584890
     },
     "5230": {
-        "name": "Sublime Wedge (Rare)",
+        "name": "Transcendence Wedge (Rare)",
         "type": "Cube Material",
         "price": 0.214,
         "last_update": 1762492594.311722,
@@ -141,245 +148,254 @@
         "from": "0203aac6-a468-48c3-ada5-1edd3880925e"
     },
     "5250": {
-        "name": "Sublime Wedge (Legendary)",
+        "name": "Transcendence Wedge (Legendary)",
         "type": "Cube Material",
         "price": 18.071,
         "last_update": 1762492594.311722,
         "from": "fe4aec76-f723-4ef5-bca2-921f6c94956a"
     },
     "5300": {
-        "name": "Eternal Fragment",
+        "name": "Pages of Aeterna",
         "type": "Special Item",
-        "price": 0.005,
-        "last_update": 1762492594.311722,
-        "from": "dde6da50-d922-48f1-9a97-8dd6fbb3d664"
+        "price": 0.0146,
+        "last_update": 1762584811,
+        "from": "Local",
+        "last_time": 1762584811
     },
     "5310": {
-        "name": "Maze City Echoes - Momentary",
+        "name": "Aeterna Reverberation - Fleeting",
         "type": "Game Ticket",
-        "price": 0.029,
-        "last_update": 1762492594.311722,
-        "from": "e2bf8f7d-3c8e-4ff9-bf7b-976504904b44"
+        "price": 0.02,
+        "last_update": 1762584672,
+        "from": "Local",
+        "last_time": 1762584672
     },
     "5311": {
-        "name": "Maze City Echoes - Eternal",
+        "name": "Aeterna Reverberation - Eternal",
         "type": "Game Ticket",
         "price": 0.755,
         "last_update": 1762492594.311722,
         "from": "e2bf8f7d-3c8e-4ff9-bf7b-976504904b44"
     },
     "5401": {
-        "name": "God of Strength Contract - God of Strength",
+        "name": "Divinity Pact - God of Might",
         "type": "Magic Cube Material",
-        "price": 274.5,
-        "last_update": 1762492594.311722,
-        "from": "554718d1-d2fd-4088-8c13-e14d5d0a94e8"
+        "price": 1085.7778,
+        "last_update": 1762583628,
+        "from": "Local",
+        "last_time": 1762583628
     },
     "5402": {
-        "name": "God of Strength Contract - Brave",
+        "name": "Divinity Pact - The Brave",
         "type": "Magic Cube Material",
-        "price": 761.333,
-        "last_update": 1762492594.311722,
-        "from": "40b477a9-c094-44e7-b375-5c82f45f4d75"
+        "price": 1194.3333,
+        "last_update": 1762583660,
+        "from": "Local",
+        "last_time": 1762583660
     },
     "5403": {
-        "name": "God of Strength Contract - Striker",
+        "name": "Divinity Pact - Onslaughter",
         "type": "Magic Cube Material",
-        "price": 372.2,
-        "last_update": 1762492594.311722,
-        "from": "76639b29-d6f5-4017-ad14-db74e49a70bd"
+        "price": 355.0333,
+        "last_update": 1762583688,
+        "from": "Local",
+        "last_time": 1762583688
     },
     "5404": {
-        "name": "God of Strength Contract - Warlord",
+        "name": "Divinity Pact - Warlord",
         "type": "Magic Cube Material",
-        "price": 292.526,
-        "last_update": 1762492594.311722,
-        "from": "76639b29-d6f5-4017-ad14-db74e49a70bd"
+        "price": 329.2105,
+        "last_update": 1762583694,
+        "from": "Local",
+        "last_time": 1762583694
     },
     "5405": {
-        "name": "God of Strength Contract - God of Hunting",
+        "name": "Divinity Pact - Goddess of Hunting",
         "type": "Magic Cube Material",
-        "price": 292.263,
-        "last_update": 1762492594.311722,
-        "from": "cd291129-fca5-440c-ab54-4239d1dccf3d"
+        "price": 416.1667,
+        "last_update": 1762583700,
+        "from": "Local",
+        "last_time": 1762583700
     },
     "5406": {
-        "name": "God of Strength Contract - Sharpshooter",
+        "name": "Divinity Pact - Marksman",
         "type": "Magic Cube Material",
-        "price": 310.762,
-        "last_update": 1762492594.311722,
-        "from": "c6ca9516-d8c1-4943-8edc-ab78f4c6f702"
+        "price": 395.4,
+        "last_update": 1762583709,
+        "from": "Local",
+        "last_time": 1762583709
     },
     "5407": {
-        "name": "God of Strength Contract - Blade Runner",
+        "name": "Divinity Pact - Bladerunner",
         "type": "Magic Cube Material",
         "price": 375.25,
         "last_update": 1762492594.311722,
         "from": "76639b29-d6f5-4017-ad14-db74e49a70bd"
     },
     "5408": {
-        "name": "Godhead Contract - Druid",
+        "name": "Divinity Pact - Druid",
         "type": "Magic Cube Material",
-        "price": 286.577,
-        "last_update": 1762492594.311722,
-        "from": "98f22dae-6afb-4983-82d4-c86e2b5a111f"
+        "price": 310.8235,
+        "last_update": 1762583727,
+        "from": "Local",
+        "last_time": 1762583727
     },
     "5409": {
-        "name": "Godhead Contract - God of Knowledge",
+        "name": "Divinity Pact - Goddess of Knowledge",
         "type": "Magic Cube Material",
         "price": 938.273,
         "last_update": 1762492594.311722,
         "from": "76639b29-d6f5-4017-ad14-db74e49a70bd"
     },
     "5410": {
-        "name": "Godhead Contract - Mage",
+        "name": "Divinity Pact - Magister",
         "type": "Magic Cube Material",
         "price": 962.25,
         "last_update": 1762492594.311722,
         "from": "5b31cb2b-e9ca-44f6-963d-faa5700b9c6e"
     },
     "5411": {
-        "name": "Godhead Contract - Mystic",
+        "name": "Divinity Pact - Arcanist",
         "type": "Magic Cube Material",
         "price": 935.615,
         "last_update": 1762492594.311722,
         "from": "e4b0f3e5-4125-4f8c-85c0-9e549dc38986"
     },
     "5412": {
-        "name": "Godhead Contract - Elementalist",
+        "name": "Divinity Pact - Elementalist",
         "type": "Magic Cube Material",
         "price": 369.133,
         "last_update": 1762492594.311722,
         "from": "e4b0f3e5-4125-4f8c-85c0-9e549dc38986"
     },
     "5413": {
-        "name": "Godhead Contract - God of War",
+        "name": "Divinity Pact - God of War",
         "type": "Magic Cube Material",
         "price": 281.633,
         "last_update": 1762492594.311722,
         "from": "1ddeba1e-57ef-456e-9078-0bfebba7e699"
     },
     "5414": {
-        "name": "Godhead Contract - Shadow Dancer",
+        "name": "Divinity Pact - Shadowdancer",
         "type": "Magic Cube Material",
         "price": 277.4,
         "last_update": 1762492594.311722,
         "from": "76639b29-d6f5-4017-ad14-db74e49a70bd"
     },
     "5415": {
-        "name": "Godhead Contract - Swift Warrior",
+        "name": "Divinity Pact - Ronin",
         "type": "Magic Cube Material",
         "price": 288.533,
         "last_update": 1762492594.311722,
         "from": "76639b29-d6f5-4017-ad14-db74e49a70bd"
     },
     "5416": {
-        "name": "Godhead Contract - Ranger",
+        "name": "Divinity Pact - Ranger",
         "type": "Magic Cube Material",
         "price": 371.5,
         "last_update": 1762492594.311722,
         "from": "73935ec7-eb2a-497a-8c95-e9fe0ba2886c"
     },
     "5417": {
-        "name": "Godhead Contract - Deception God",
+        "name": "Divinity Pact - Goddess of Deception",
         "type": "Magic Cube Material",
         "price": 702.292,
         "last_update": 1762492594.311722,
         "from": "c7063e12-f469-4bf3-95d6-55816fd8b44f"
     },
     "5418": {
-        "name": "Godhead Contract - Shadow Slave",
+        "name": "Divinity Pact - Shadowmaster",
         "type": "Magic Cube Material",
         "price": 354.125,
         "last_update": 1762492594.311722,
         "from": "cd291129-fca5-440c-ab54-4239d1dccf3d"
     },
     "5419": {
-        "name": "Godhead Contract - Psychic",
+        "name": "Divinity PactContract - Psychic",
         "type": "Magic Cube Material",
         "price": 285.885,
         "last_update": 1762492594.311722,
         "from": "3d565d8e-5b3c-49e0-8081-9d07f7260625"
     },
     "5420": {
-        "name": "Godhead Contract - Shadow Warlock",
+        "name": "Divinity Pact - Warlock",
         "type": "Magic Cube Material",
         "price": 354.125,
         "last_update": 1762492594.311722,
         "from": "d8b9932b-1534-4804-93be-7025414ee920"
     },
     "5421": {
-        "name": "Godhead Contract - Mechanical God",
+        "name": "Divinity Pact - God of Machines",
         "type": "Magic Cube Material",
         "price": 391.154,
         "last_update": 1762492594.311722,
         "from": "d2a26768-5f17-453f-8d87-bec9285f1305"
     },
     "5422": {
-        "name": "Godhead Contract - Mechanic",
+        "name": "Divinity Pact - Machinist",
         "type": "Magic Cube Material",
         "price": 294.769,
         "last_update": 1762492594.311722,
         "from": "39cfa5b1-2dcf-490a-8b68-00af8563a9bb"
     },
     "5423": {
-        "name": "Godhead Contract - Iron Vanguard",
+        "name": "Divinity Pact - Steel Vanguard",
         "type": "Magic Cube Material",
         "price": 311.667,
         "last_update": 1762492594.311722,
         "from": "61516e14-5a88-4edb-aed8-ded6684ddcf6"
     },
     "5424": {
-        "name": "Godhead Contract - Alchemist",
+        "name": "Divinity Pact - Alchemist",
         "type": "Magic Cube Material",
         "price": 364.783,
         "last_update": 1762492594.311722,
         "from": "cd291129-fca5-440c-ab54-4239d1dccf3d"
     },
     "5425": {
-        "name": "Godhead Contract - Fighter",
+        "name": "Divinity Pact - Warrior",
         "type": "Magic Cube Material",
         "price": 299.643,
         "last_update": 1762492594.311722,
         "from": "76639b29-d6f5-4017-ad14-db74e49a70bd"
     },
     "5426": {
-        "name": "Godhead Contract - Assassin",
+        "name": "Divinity Pact - Assassin",
         "type": "Magic Cube Material",
         "price": 736.533,
         "last_update": 1762492594.311722,
         "from": "cd291129-fca5-440c-ab54-4239d1dccf3d"
     },
     "5427": {
-        "name": "Godhead Contract - Prophet",
+        "name": "Divinity Pact - Prophet",
         "type": "Magic Cube Material",
         "price": 285.421,
         "last_update": 1762492594.311722,
         "from": "76639b29-d6f5-4017-ad14-db74e49a70bd"
     },
     "5428": {
-        "name": "Godhead Contract - Iron Guard",
+        "name": "Divinity Pact - Sentinel",
         "type": "Magic Cube Material",
         "price": 309.0,
         "last_update": 1762492594.311722,
         "from": "cd291129-fca5-440c-ab54-4239d1dccf3d"
     },
     "5429": {
-        "name": "Godhead Contract - Lich",
+        "name": "Divinity Pact - Lich",
         "type": "Magic Cube Materials",
         "price": 285.421,
         "last_update": 1762492594.311722,
         "from": "17a98ff8-427c-425e-ac52-83134efe9420"
     },
     "5430": {
-        "name": "Divine Contract - Craftsman",
+        "name": "Divinity Pact - Artisan",
         "type": "Magic Cube Materials",
         "price": 270.808,
         "last_update": 1762492594.311722,
         "from": "cd291129-fca5-440c-ab54-4239d1dccf3d"
     },
     "5700": {
-        "name": "Tower Chip - Energy",
+        "name": "TOWER Token - Energy",
         "type": "Tower Materials",
         "price": 0.373,
         "last_update": 1762492594.311722,
@@ -387,7 +403,7 @@
         "last_time": 1762445814
     },
     "5701": {
-        "name": "Tower Chip - Fluorescence",
+        "name": "TOWER Token - Fluorescent",
         "type": "Tower Materials",
         "price": 7.703,
         "last_update": 1762492594.311722,
@@ -395,15 +411,15 @@
         "last_time": 1762099079
     },
     "5702": {
-        "name": "Tower Chip - Affix",
+        "name": "TOWER Token - Affix",
         "type": "Tower Materials",
-        "price": 102.4333,
-        "last_update": 1762573816,
+        "price": 103.3667,
+        "last_update": 1762583544,
         "from": "Local",
-        "last_time": 1762573816
+        "last_time": 1762583544
     },
     "5703": {
-        "name": "Tower Chip - Uncertain Fate",
+        "name": "TOWER Token - Undetermined Fate",
         "type": "Tower Materials",
         "price": 1.0,
         "last_update": 1762532873,
@@ -411,56 +427,57 @@
         "last_time": 1762532873
     },
     "5704": {
-        "name": "Tower Chip - Corrosion",
+        "name": "TOWER Token - Corrosion",
         "type": "Tower Materials",
         "price": 82.3,
         "last_update": 1762492594.311722,
         "from": "3cd35063-4f41-4477-b878-f41aa7f747a3"
     },
     "5705": {
-        "name": "Tower Chip - Treasure",
+        "name": "TOWER Token - Priceless",
         "type": "Tower Materials",
         "price": 5247.25,
         "last_update": 1762492594.311722,
         "from": "76510431-96b2-43bb-a3b2-d0668add1f1d"
     },
     "6002": {
-        "name": "Secret of the Cold Abyss",
+        "name": "Secret of the Glacial Abyss",
         "type": "Memory Fluorescence",
         "price": 0.301,
         "last_update": 1762492594.311722,
         "from": "7c6efefd-68ea-4568-9d17-3e2b989f5bea"
     },
     "6003": {
-        "name": "The Crow's Cry",
+        "name": "Crow's Wail",
         "type": "Memory Fluorescence",
         "price": 3.388,
         "last_update": 1762492594.311722,
         "from": "7c6efefd-68ea-4568-9d17-3e2b989f5bea"
     },
     "6004": {
-        "name": "Black Calendar's Skill",
+        "name": "Maud's Trick",
         "type": "Memory Fluorescence",
-        "price": 0.333,
-        "last_update": 1762492594.311722,
-        "from": "7c6efefd-68ea-4568-9d17-3e2b989f5bea"
+        "price": 0.3329,
+        "last_update": 1762583904,
+        "from": "Local",
+        "last_time": 1762583904
     },
     "6006": {
-        "name": "Moon of Omens",
+        "name": "Portent Moon",
         "type": "Memory Fluorescence",
         "price": 35.0,
         "last_update": 1762492594.311722,
         "from": "3010bc53-c2b8-4514-9ecb-1b1dece03aa5"
     },
     "6007": {
-        "name": "Lost Treasure",
+        "name": "Lost Secrets",
         "type": "Memory Fluorescence",
         "price": 2.983,
         "last_update": 1762492594.311722,
         "from": "e2bf8f7d-3c8e-4ff9-bf7b-976504904b44"
     },
     "6008": {
-        "name": "The Price of Not Being Cruel",
+        "name": "A Terrible Price",
         "type": "Memory Fluorescence",
         "price": 18.735,
         "last_update": 1762529536,
@@ -468,110 +485,114 @@
         "last_time": 1762529536
     },
     "6019": {
-        "name": "The Strange Stone at the Center of the Sun",
+        "name": "Helio Rock",
         "type": "Memory Fluorescence",
         "price": 174.7,
         "last_update": 1762492594.311722,
         "from": "2fdf0c4e-0c51-402f-8320-d34fc5589901"
     },
     "6026": {
-        "name": "Antonio's Help",
+        "name": "Antonius's Help",
         "type": "Memory Fluorescence",
         "price": 2.002,
         "last_update": 1762492594.311722,
         "from": "e780a367-0b93-49f5-b39a-85768657ba0d"
     },
     "6027": {
-        "name": "Strange Stone of the Corona",
+        "name": "Aureole Rock",
         "type": "Memory Fluorescence",
         "price": 13.816,
         "last_update": 1762492594.311722,
         "from": "395e68ee-6a08-4e14-aee6-bfb89dcf21e2"
     },
     "6054": {
-        "name": "Scholar's Strange Thought",
+        "name": "Clergy's Thinking",
         "type": "Memory Fluorescence",
         "price": 150.0,
         "last_update": 1762492594.311722,
         "from": "33a6e2cc-eb9d-4e0c-b03c-361be7f9d97b"
     },
     "6111": {
-        "name": "Furicon Burst",
+        "name": "Supernova Explosion",
         "type": "Memory Fluorescence",
-        "price": 7.388,
-        "last_update": 1762492594.311722,
-        "from": "FurryHeiLi",
-        "last_time": 1762476554
+        "price": 8.9056,
+        "last_update": 1762583954,
+        "from": "Local",
+        "last_time": 1762583954
     },
     "6118": {
-        "name": "Echoes of the Gods",
+        "name": "Echo of the Gods",
         "type": "Memory Fluorescence",
         "price": 11.86,
         "last_update": 1762492594.311722,
         "from": "0203aac6-a468-48c3-ada5-1edd3880925e"
     },
     "6119": {
-        "name": "The Stray Firefly",
+        "name": "Stray Fireflies",
         "type": "Memory Fluorescence",
         "price": 385.333,
         "last_update": 1762492594.311722,
         "from": "a6ea14b4-e470-4ed2-b576-7533ee29d811"
     },
     "6125": {
-        "name": "Hundred Million-Fold Windfall",
+        "name": "Hundredfold Windfall",
         "type": "Memory Fluorescence",
         "price": 11.132,
         "last_update": 1762492594.311722,
         "from": "2e362871-ff42-406e-834c-b2868fca8c6a"
     },
     "6127": {
-        "name": "Burn Together",
+        "name": "Immolating Flame",
         "type": "Memory Fluorescence",
-        "price": 154.52,
-        "last_update": 1762492594.311722,
-        "from": "327344f5-16af-451e-9141-908270ee9f10"
+        "price": 55.7667,
+        "last_update": 1762583991,
+        "from": "Local",
+        "last_time": 1762583991
     },
     "6135": {
-        "name": "Desecrating the Star Cluster",
+        "name": "Defile the Stars",
         "type": "Memory Fluorescence",
         "price": 17030.667,
         "last_update": 1762492594.311722,
         "from": "8dacbdfe-f437-4d66-ab29-56733635f5ae"
     },
     "6139": {
-        "name": "God's Supernova",
+        "name": "Divine Supernova",
         "type": "Memory Fluorescence",
         "price": 303.6,
         "last_update": 1762492594.311722,
         "from": "5a971ee7-1d83-4f8f-916f-87b80b2d111c"
     },
     "6141": {
-        "name": "Hollow Man's 😚",
+        "name": "The Kiss of the Heartless",
         "type": "Memory Fluorescence",
-        "price": 2.967,
-        "last_update": 1762492594.311722,
-        "from": "81b83468-cd54-4e20-8881-44fda17eed27"
+        "price": 1.971,
+        "last_update": 1762584010,
+        "from": "Local",
+        "last_time": 1762584010
     },
     "6143": {
-        "name": "Second Level of Godhood",
+        "name": "Second Divinity",
         "type": "Memory Fluorescence",
         "price": 99.833,
         "last_update": 1762492594.311722,
         "from": "0a21db76-edd2-47f1-a8ce-f11e2e6e600e"
     },
     "6147": {
-        "name": "One-tenth Twin Reflection",
+        "name": "Gaze Upon the Reflection",
         "type": "Memory Fluorescence",
-        "price": 3639.133,
-        "last_update": 1762492594.311722,
-        "from": "395e68ee-6a08-4e14-aee6-bfb89dcf21e2"
+        "price": 3819.7667,
+        "last_update": 1762584030,
+        "from": "Local",
+        "last_time": 1762584030
     },
     "6148": {
-        "name": "One-hundredth Twin Reflection",
+        "name": "Unhatched Shadow",
         "type": "Memory Fluorescence",
-        "price": 297.467,
-        "last_update": 1762492594.311722,
-        "from": "5506392b-1c86-4dbe-b025-24caf24b45a3"
+        "price": 385.6333,
+        "last_update": 1762584040,
+        "from": "Local",
+        "last_time": 1762584040
     },
     "6153": {
         "name": "Tomorrow's Direction",
@@ -582,35 +603,36 @@
         "last_time": 1762499259
     },
     "6205": {
-        "name": "Unpredictable Direction",
+        "name": "Uncertain Voyage",
         "type": "Memory Fluorescence",
         "price": 0.336,
         "last_update": 1762492594.311722,
         "from": "ebac22f1-989f-4523-b597-694744efe09a"
     },
     "6216": {
-        "name": "One-fifth Solitaire Boots",
+        "name": "Disappearing Shadow",
         "type": "Memory Fluorescence",
-        "price": 430.633,
-        "last_update": 1762492594.311722,
-        "from": "4e3b98b5-5729-4245-97b8-516e044eba24"
+        "price": 338.4833,
+        "last_update": 1762584058,
+        "from": "Local",
+        "last_time": 1762584058
     },
     "6217": {
-        "name": "Unfettered Stars",
+        "name": "Unfettered Constellation",
         "type": "Memory Fluorescence",
         "price": 2494.333,
         "last_update": 1762492594.311722,
         "from": "33a6e2cc-eb9d-4e0c-b03c-361be7f9d97b"
     },
     "6218": {
-        "name": "The End of the Past",
+        "name": "End of the Past",
         "type": "Memory Fluorescence",
         "price": 530.32,
         "last_update": 1762492594.311722,
         "from": "30d2be77-4c80-4d52-a7f4-6a3497ec59f4"
     },
     "6219": {
-        "name": "The Egg Day of the Past",
+        "name": "Beginning of the Past",
         "type": "Memory Fluorescence",
         "price": 30.742,
         "last_update": 1762492594.311722,
@@ -624,82 +646,87 @@
         "from": "5506392b-1c86-4dbe-b025-24caf24b45a3"
     },
     "6221": {
-        "name": "Still in the Mirror",
+        "name": "Prism's Echo",
         "type": "Memory Fluorescence",
-        "price": 13.541,
-        "last_update": 1762492594.311722,
-        "from": "0f345da2-3211-4023-bbde-285572c45844"
+        "price": 15.8333,
+        "last_update": 1762584083,
+        "from": "Local",
+        "last_time": 1762584083
     },
     "8604": {
-        "name": "Precision - Self-Discipline",
+        "name": "Precise: Disciplined",
         "type": "Special Item",
-        "price": 26.033,
-        "last_update": 1762492594.311722,
-        "from": "5512cfb5-398e-4f05-b2ec-6723f6a36bb8"
+        "price": 28.0333,
+        "last_update": 1762585093,
+        "from": "Local",
+        "last_time": 1762585093
     },
     "8608": {
-        "name": "Precision - Intensive Enhancement",
+        "name": "Precise: Focus Buff",
         "type": "Special Item",
-        "price": 32.2,
-        "last_update": 1762492594.311722,
-        "from": "933f28ad-eab7-4d95-a45c-e6f8256280f0"
+        "price": 27.0667,
+        "last_update": 1762585199,
+        "from": "Local",
+        "last_time": 1762585199
     },
     "8611": {
-        "name": "Precision - Super Energy Symbiosis",
+        "name": "Precise: Superpower",
         "type": "Special Item",
-        "price": 697.8,
-        "last_update": 1762492594.311722,
-        "from": "bdc0436a-cd9d-49bc-a5ad-61e0269a8f16"
+        "price": 375.4333,
+        "last_update": 1762585131,
+        "from": "Local",
+        "last_time": 1762585131
     },
     "8614": {
-        "name": "Precision - Throttling",
+        "name": "Precise Restrain",
         "type": "Special Item",
-        "price": 3696.033,
-        "last_update": 1762492594.311722,
-        "from": "33a6e2cc-eb9d-4e0c-b03c-361be7f9d97b"
+        "price": 4133.7333,
+        "last_update": 1762585108,
+        "from": "Local",
+        "last_time": 1762585108
     },
     "10001": {
-        "name": "Sin's Plundering Compass",
+        "name": "Sinful Plundering Compass",
         "type": "Compass",
-        "price": 36.65,
-        "last_update": 1762576827,
+        "price": 37.0193,
+        "last_update": 1762583286,
         "from": "Local",
-        "last_time": 1762576827
+        "last_time": 1762583286
     },
     "10002": {
-        "name": "Sin's Plundering Compass (Relic)",
+        "name": "Sinful Plundering Compass (Artifact)",
         "type": "Compass",
-        "price": 62.2556,
-        "last_update": 1762577056,
+        "price": 68.65,
+        "last_update": 1762583272,
         "from": "Local",
-        "last_time": 1762577056
+        "last_time": 1762583272
     },
     "10003": {
-        "name": "Felonious Plundering Compass",
+        "name": "Transgression Plundering Compass",
         "type": "Compass",
-        "price": 14.8222,
-        "last_update": 1762499273,
+        "price": 19.8889,
+        "last_update": 1762583327,
         "from": "Local",
-        "last_time": 1762499273
+        "last_time": 1762583327
     },
     "10010": {
-        "name": "Rare Compass",
+        "name": "Novel Compass",
         "type": "Compass",
-        "price": 1.9641,
-        "last_update": 1762576911,
+        "price": 1.8408,
+        "last_update": 1762584100,
         "from": "Local",
-        "last_time": 1762576911
+        "last_time": 1762584100
     },
     "10011": {
-        "name": "Linglang's Rare Compass",
+        "name": "Lavish Novel Compass",
         "type": "Compass",
-        "price": 3.9482,
-        "last_update": 1762576793,
+        "price": 3.9273,
+        "last_update": 1762584109,
         "from": "Local",
-        "last_time": 1762576793
+        "last_time": 1762584109
     },
     "10012": {
-        "name": "Pojun's Rare Compass",
+        "name": "Conquering Compass",
         "type": "Compass",
         "price": 12.117,
         "last_update": 1762492594.311722,
@@ -707,7 +734,7 @@
         "last_time": 1761197264
     },
     "10022": {
-        "name": "Soldier's Compass",
+        "name": "Soldier Compass",
         "type": "Compass",
         "price": 0.2932,
         "last_update": 1762576908,
@@ -715,7 +742,7 @@
         "last_time": 1762576908
     },
     "10023": {
-        "name": "Soldier's Compass of All Martial Arts",
+        "name": "Strength in Numbers Soldier",
         "type": "Compass",
         "price": 3.4856,
         "last_update": 1762576791,
@@ -723,7 +750,7 @@
         "last_time": 1762576791
     },
     "10032": {
-        "name": "Elite Soldier's Compass",
+        "name": "Veteran Compass",
         "type": "Compass",
         "price": 0.3624,
         "last_update": 1762576905,
@@ -731,7 +758,7 @@
         "last_time": 1762576905
     },
     "10033": {
-        "name": "Enemy-Defeating Compass",
+        "name": "Unrivaled Veteran Compass",
         "type": "Compass",
         "price": 4.778,
         "last_update": 1762576788,
@@ -739,7 +766,7 @@
         "last_time": 1762576788
     },
     "10042": {
-        "name": "Strong Enemy Compass",
+        "name": "Elite Compass",
         "type": "Compass",
         "price": 0.2931,
         "last_update": 1762576903,
@@ -747,7 +774,7 @@
         "last_time": 1762576903
     },
     "10043": {
-        "name": "Gentle Rival Compass",
+        "name": "Generous Elite Compass",
         "type": "Compass",
         "price": 7.7009,
         "last_update": 1762576785,
@@ -755,7 +782,7 @@
         "last_time": 1762576785
     },
     "10044": {
-        "name": "Rich Rival Compass",
+        "name": "Bountiful Elite Compass",
         "type": "Compass",
         "price": 134.8119,
         "last_update": 1762499252,
@@ -779,7 +806,7 @@
         "last_time": 1762576898
     },
     "10051": {
-        "name": "Beacon Compass of Gain",
+        "name": "Progressing Beacon Compass",
         "type": "Compass",
         "price": 7.8843,
         "last_update": 1762576769,
@@ -787,43 +814,44 @@
         "last_time": 1762576769
     },
     "10052": {
-        "name": "Zodiac Compass",
+        "name": "Ecliptic Compass",
         "type": "Compass",
-        "price": 0.2806,
-        "last_update": 1762576896,
+        "price": 0.279,
+        "last_update": 1762584171,
         "from": "Local",
-        "last_time": 1762576896
+        "last_time": 1762584171
     },
     "10053": {
-        "name": "Zodiac Compass of the Vastness",
+        "name": "Vast Ecliptic Compass",
         "type": "Compass",
         "price": 5.095,
         "last_update": 1762492594.311722,
         "from": "1dc1cb6d-ad85-4a90-bf1f-210a9b45254b"
     },
     "10054": {
-        "name": "Zodiac Compass of the Ascension",
+        "name": "Ascendant Ecliptic Compass",
         "type": "Compass",
         "price": 15.682,
         "last_update": 1762492594.311722,
         "from": "1dc1cb6d-ad85-4a90-bf1f-210a9b45254b"
     },
     "10060": {
-        "name": "Weapon Compass of Fame",
+        "name": "Renown Edge Compass",
         "type": "Compass",
-        "price": 9.237,
-        "last_update": 1762492594.311722,
-        "from": "eaed3838-8718-4808-9104-401a1852603a"
+        "price": 7.4346,
+        "last_update": 1762584194,
+        "from": "Local",
+        "last_time": 1762584194
     },
     "10071": {
-        "name": "Armed Compass",
+        "name": "Militant Compass",
         "type": "Compass",
         "price": 0.49,
         "last_update": 1762492594.311722,
         "from": "54882c1a-8e25-40d3-8b78-96032e4565ef"
     },
     "10072": {
-        "name": "Armed Compass of Treasure",
+        "name": "Priceless Militant Compass",
         "type": "Compass",
         "price": 6.817,
         "last_update": 1762492594.311722,
@@ -831,14 +859,14 @@
         "last_time": 1761417748
     },
     "10073": {
-        "name": "Armed Compass of Accessory",
+        "name": "Trinket Militant Compass",
         "type": "Compass",
         "price": 2.017,
         "last_update": 1762492594.311722,
         "from": "e91c1929-64b1-4476-91a9-aa3e0d1f41bd"
     },
     "10081": {
-        "name": "Compass of Ashes",
+        "name": "Ember Compass",
         "type": "Compass",
         "price": 0.3226,
         "last_update": 1762576893,
@@ -846,7 +874,7 @@
         "last_time": 1762576893
     },
     "10082": {
-        "name": "BaiShou Ash Compass",
+        "name": "Bounty Ember Compass",
         "type": "Compass",
         "price": 0.3679,
         "last_update": 1762576764,
@@ -854,7 +882,7 @@
         "last_time": 1762576764
     },
     "10083": {
-        "name": "Selected Ash Compass",
+        "name": "Reserve Ember Compass",
         "type": "Compass",
         "price": 1.0505,
         "last_update": 1762576733,
@@ -878,7 +906,7 @@
         "last_time": 1762576761
     },
     "10103": {
-        "name": "Fluorescent Compass of Spotlight",
+        "name": "Focus Fluorescent Compass",
         "type": "Compass",
         "price": 4.9637,
         "last_update": 1762499275,
@@ -886,7 +914,7 @@
         "last_time": 1762499275
     },
     "10110": {
-        "name": "Prosperous Gods Compass",
+        "name": "Fluorishing Gods Compass",
         "type": "Compass",
         "price": 6.7185,
         "last_update": 1762497457,
@@ -894,7 +922,7 @@
         "last_time": 1762497457
     },
     "10120": {
-        "name": "Conquest Compass",
+        "name": "War Compass",
         "type": "Compass",
         "price": 3.4382,
         "last_update": 1762576884,
@@ -902,7 +930,7 @@
         "last_time": 1762576884
     },
     "10122": {
-        "name": "Brave Compass",
+        "name": "Valiant War Compass",
         "type": "Compass",
         "price": 3.9384,
         "last_update": 1762497459,
@@ -910,7 +938,7 @@
         "last_time": 1762497459
     },
     "10130": {
-        "name": "Mighty Compass",
+        "name": "Might Compass",
         "type": "Compass",
         "price": 0.2715,
         "last_update": 1762576882,
@@ -918,7 +946,7 @@
         "last_time": 1762576882
     },
     "10131": {
-        "name": "Prosperous Mighty Compass",
+        "name": "Fluorishing Mighty Compass",
         "type": "Compass",
         "price": 0.2637,
         "last_update": 1762576758,
@@ -926,7 +954,7 @@
         "last_time": 1762576758
     },
     "10133": {
-        "name": "Mighty Compass of Divine Might",
+        "name": "Onslaught Might Compass",
         "type": "Compass",
         "price": 0.4587,
         "last_update": 1762576731,
@@ -934,7 +962,7 @@
         "last_time": 1762576731
     },
     "10134": {
-        "name": "Mecha Mighty Compass (Relic)",
+        "name": "Mecha Mighty Compass (Artifact)",
         "type": "Compass",
         "price": 27.35,
         "last_update": 1762492594.311722,
@@ -949,7 +977,7 @@
         "last_time": 1762576879
     },
     "10142": {
-        "name": "Shogun's Hunting Compass",
+        "name": "General Hunting Compass",
         "type": "Compass",
         "price": 3.2827,
         "last_update": 1762576755,
@@ -965,7 +993,7 @@
         "last_time": 1762576877
     },
     "10151": {
-        "name": "Glorious Mechanical Compass",
+        "name": "Brilliant Mechanical Compass",
         "type": "Compass",
         "price": 2.79,
         "last_update": 1762577059,
@@ -973,21 +1001,21 @@
         "last_time": 1762577059
     },
     "10153": {
-        "name": "Differentiation Mechanical Compass",
+        "name": "Divide Mechanical Compass",
         "type": "Compass",
         "price": 6.675,
         "last_update": 1762492594.311722,
         "from": "a9f54457-4200-4535-983e-73b59e44e8dc"
     },
     "10154": {
-        "name": "Cruising Mechanical Compass (Relic)",
+        "name": "Cruising Mechanical Compass (Artifact)",
         "type": "Compass",
         "price": 7.85,
         "last_update": 1762492594.311722,
         "from": "a9f54457-4200-4535-983e-73b59e44e8dc"
     },
     "10160": {
-        "name": "Black Tide Compass",
+        "name": "Dark Surge Compass",
         "type": "Compass",
         "price": 0.2728,
         "last_update": 1762576875,
@@ -995,7 +1023,7 @@
         "last_time": 1762576875
     },
     "10161": {
-        "name": "Black Tide Compass of the Bandit Leader",
+        "name": "Bandit Dark Surge Compass",
         "type": "Compass",
         "price": 1.2293,
         "last_update": 1762576751,
@@ -1003,7 +1031,7 @@
         "last_time": 1762576751
     },
     "10162": {
-        "name": "Divine Weapon Black Tide Compass",
+        "name": "Divine Warrior Dark Surge Compass",
         "type": "Compass",
         "price": 5.3889,
         "last_update": 1762577061,
@@ -1011,7 +1039,7 @@
         "last_time": 1762577061
     },
     "10170": {
-        "name": "Black Sail Compass",
+        "name": "Blacksail Compass",
         "type": "Compass",
         "price": 0.2769,
         "last_update": 1762576873,
@@ -1019,7 +1047,7 @@
         "last_time": 1762576873
     },
     "10171": {
-        "name": "Advent Black Sails Compass",
+        "name": "Returning Blacksail Compass",
         "type": "Compass",
         "price": 0.9891,
         "last_update": 1762576748,
@@ -1027,7 +1055,7 @@
         "last_time": 1762576748
     },
     "10180": {
-        "name": "Magic Cube Compass",
+        "name": "Cube Compass",
         "type": "Compass",
         "price": 0.6897,
         "last_update": 1762576870,
@@ -1035,7 +1063,7 @@
         "last_time": 1762576870
     },
     "10181": {
-        "name": "Bipolar Magic Cube Compass",
+        "name": "Cube Compass: Two Extremes",
         "type": "Compass",
         "price": 10.9316,
         "last_update": 1762577064,
@@ -1043,7 +1071,7 @@
         "last_time": 1762577064
     },
     "10182": {
-        "name": "Desire's Cube Compass",
+        "name": "Desire Incarnation Cube Compass",
         "type": "Compass",
         "price": 32.1348,
         "last_update": 1762577255,
@@ -1051,15 +1079,15 @@
         "last_time": 1762577255
     },
     "10190": {
-        "name": "Maze City Compass",
+        "name": "Aeterna Compass",
         "type": "Compass",
-        "price": 0.271,
-        "last_update": 1762576868,
+        "price": 0.2544,
+        "last_update": 1762584348,
         "from": "Local",
-        "last_time": 1762576868
+        "last_time": 1762584348
     },
     "10191": {
-        "name": "Family's Maze City Compass",
+        "name": "Familial Aeterna Compass",
         "type": "Compass",
         "price": 0.3784,
         "last_update": 1762576746,
@@ -1067,7 +1095,7 @@
         "last_time": 1762576746
     },
     "10200": {
-        "name": "Dream Compass",
+        "name": "Nightmare Compass",
         "type": "Compass",
         "price": 2.8301,
         "last_update": 1762576861,
@@ -1075,7 +1103,7 @@
         "last_time": 1762576861
     },
     "10210": {
-        "name": "Strange Story Compass",
+        "name": "Folklore Compass",
         "type": "Compass",
         "price": 0.3273,
         "last_update": 1762576853,
@@ -1083,7 +1111,7 @@
         "last_time": 1762576853
     },
     "10211": {
-        "name": "Strange Story Compass of the Stranger",
+        "name": "Uncanny Folklore Compass",
         "type": "Compass",
         "price": 1.689,
         "last_update": 1762492594.311722,
@@ -1098,7 +1126,7 @@
         "last_time": 1762576851
     },
     "10221": {
-        "name": "Collection of Doll Compass",
+        "name": "Collection Doll Compass",
         "type": "Compass",
         "price": 0.9582,
         "last_update": 1762576743,
@@ -1106,7 +1134,7 @@
         "last_time": 1762576743
     },
     "10222": {
-        "name": "Collection of Doll Compass (Legacy)",
+        "name": "Collection Clockwork Compass (Artifact)",
         "type": "Compass",
         "price": 29.4078,
         "last_update": 1762569641,
@@ -1114,7 +1142,7 @@
         "last_time": 1762569641
     },
     "10230": {
-        "name": "Painted Snow Compass",
+        "name": "Frozen Canvas Compass",
         "type": "Compass",
         "price": 0.2882,
         "last_update": 1762576848,
@@ -1122,7 +1150,7 @@
         "last_time": 1762576848
     },
     "10231": {
-        "name": "Harvest Painted Snow Compass",
+        "name": "Frozen Canvas Compass: Abundance",
         "type": "Compass",
         "price": 2.5105,
         "last_update": 1762576736,
@@ -1130,7 +1158,7 @@
         "last_time": 1762576736
     },
     "10240": {
-        "name": "Tarot Compass",
+        "name": "Arcana Compass",
         "type": "Compass",
         "price": 0.2739,
         "last_update": 1762576846,
@@ -1138,7 +1166,7 @@
         "last_time": 1762576846
     },
     "10241": {
-        "name": "Hole Card Tarot Compass",
+        "name": "Trump Card Arcana Compass",
         "type": "Compass",
         "price": 3.7715,
         "last_update": 1762575056,
@@ -1146,7 +1174,7 @@
         "last_time": 1762575056
     },
     "10242": {
-        "name": "Destiny Tarot Compass",
+        "name": "The Fated Arcana Compass",
         "type": "Compass",
         "price": 69.3181,
         "last_update": 1762577249,
@@ -1154,7 +1182,7 @@
         "last_time": 1762577249
     },
     "10250": {
-        "name": "Tycoon Compass",
+        "name": "Sandlord Compass",
         "type": "Compass",
         "price": 2.2907,
         "last_update": 1762576839,
@@ -1162,7 +1190,7 @@
         "last_time": 1762576839
     },
     "10260": {
-        "name": "Wanted Compass",
+        "name": "Outlaw Compass",
         "type": "Compass",
         "price": 14.1,
         "last_update": 1762576835,
@@ -1170,21 +1198,21 @@
         "last_time": 1762576835
     },
     "10261": {
-        "name": "Wanted Compass with Bounty",
+        "name": "Bounty Outlaw Compass",
         "type": "Compass",
         "price": 125.522,
         "last_update": 1762492594.311722,
         "from": "1c2e0960-7787-48cf-992b-c5dd94295187"
     },
     "10262": {
-        "name": "Wanted Compass with Alert",
+        "name": "Alert Outlaw Compass",
         "type": "Compass",
         "price": 156.833,
         "last_update": 1762492594.311722,
         "from": "ebac22f1-989f-4523-b597-694744efe09a"
     },
     "10270": {
-        "name": "Caged Compass",
+        "name": "Cage Compass",
         "type": "Compass",
         "price": 5.7794,
         "last_update": 1762576832,
@@ -1192,7 +1220,7 @@
         "last_time": 1762576832
     },
     "10272": {
-        "name": "Golden Caged Compass",
+        "name": "Golden Cage Compass",
         "type": "Compass",
         "price": 525.0,
         "last_update": 1762492594.311722,
@@ -1200,50 +1228,52 @@
         "last_time": 1761183163
     },
     "12000": {
-        "name": "Prosperity Deep Probe",
+        "name": "Fluorishing Profound Probe",
         "type": "Compass",
-        "price": 5.747,
-        "last_update": 1762492594.311722,
-        "from": "c60f0fa4-80a0-48ba-85e4-1dbd800ec5ba"
+        "price": 6.8829,
+        "last_update": 1762584487,
+        "from": "Local",
+        "last_time": 1762584487
     },
     "12001": {
-        "name": "Prosperity Deep Space Probe",
+        "name": "Fluorishing Deep Space Probe",
         "type": "Compass",
-        "price": 39.856,
-        "last_update": 1762492594.311722,
-        "from": "17e38d0e-97dc-424e-b7a8-ad11fdb3a2da"
+        "price": 52.7126,
+        "last_update": 1762584452,
+        "from": "Local",
+        "last_time": 1762584452
     },
     "12010": {
-        "name": "Equipment: Deep Space Probe",
+        "name": "Gear Profound Probe",
         "type": "Compass",
         "price": 7.806,
         "last_update": 1762492594.311722,
         "from": "e79552fb-124c-4996-b608-1d2ec3eeeba3"
     },
     "12011": {
-        "name": "Equipment: Deep Space Probe",
+        "name": "Gear Deep Space Probe",
         "type": "Compass",
-        "price": 84.133,
-        "last_update": 1762492594.311722,
-        "from": "FurryHeiLi",
-        "last_time": 1761185036
+        "price": 68.8667,
+        "last_update": 1762584465,
+        "from": "Local",
+        "last_time": 1762584465
     },
     "12020": {
-        "name": "Ember's Deep Space Probe",
+        "name": "Ember Profound Probe",
         "type": "Compass",
         "price": 2.885,
         "last_update": 1762492594.311722,
         "from": "c60f0fa4-80a0-48ba-85e4-1dbd800ec5ba"
     },
     "12021": {
-        "name": "Ember's Deep Space Probe",
+        "name": "Ember Deep Space Probe",
         "type": "Compass",
         "price": 3.917,
         "last_update": 1762492594.311722,
         "from": "78e54d9e-9e49-4a71-a4c6-13ba5c4d4af6"
     },
     "12030": {
-        "name": "Fluorescent Deep Space Probe",
+        "name": "Fluorescent Profound Probe",
         "type": "Compass",
         "price": 3.369,
         "last_update": 1762492594.311722,
@@ -1257,28 +1287,29 @@
         "from": "ca91e5a6-833e-49b4-9d8b-62f72dac3000"
     },
     "12040": {
-        "name": "Compass's Deep Space Probe",
+        "name": "Compass Profound Probe",
         "type": "Compass",
         "price": 6.596,
         "last_update": 1762492594.311722,
         "from": "cde7bf4e-e343-4e7e-8e2c-f9e7cf334fc8"
     },
     "12041": {
-        "name": "Compass's Deep Space Probe",
+        "name": "Compass Deep Space Probe",
         "type": "Compass",
         "price": 51.567,
         "last_update": 1762492594.311722,
         "from": "78e54d9e-9e49-4a71-a4c6-13ba5c4d4af6"
     },
     "12050": {
-        "name": "Beacon of the Deep Probe",
+        "name": "Beacon Profound Probe",
         "type": "Compass",
-        "price": 2.954,
-        "last_update": 1762492594.311722,
-        "from": "e1d9aba8-c9be-40e4-ab0b-4c5e03f37904"
+        "price": 7.812,
+        "last_update": 1762584536,
+        "from": "Local",
+        "last_time": 1762584536
     },
     "100001": {
-        "name": "Sin's Plundering Compass",
+        "name": "Sinful Plunder Compass",
         "type": "Compass",
         "price": 18.9919,
         "last_update": 1762492594.311722
@@ -1298,7 +1329,7 @@
         "last_update": 1762492594.311722
     },
     "140004": {
-        "name": "Light White Dream - Weapon",
+        "name": "Shallow Dream Talking - Weapon",
         "type": "Dream Material",
         "price": 8.709,
         "last_time": 1762038876,
@@ -1306,7 +1337,7 @@
         "last_update": 1762492594.311722
     },
     "140005": {
-        "name": "Light White Dream - Armor",
+        "name": "Shallow Dream Talking - Armor",
         "type": "Dream Material",
         "price": 4.283,
         "last_time": 1762038892,
@@ -1314,7 +1345,7 @@
         "last_update": 1762492594.311722
     },
     "140006": {
-        "name": "Light White Dream - Accessory",
+        "name": "Shallow Dream Talking - Trinket",
         "type": "Dream Material",
         "price": 25.3723,
         "last_time": 1762577981,
@@ -1322,35 +1353,36 @@
         "last_update": 1762577981
     },
     "200003": {
-        "name": "High-Quality Ashes",
+        "name": "Fine Ember",
         "type": "Equipment Material",
-        "price": 0.104,
-        "last_update": 1762492594.311722,
-        "from": "7c851be9-3a40-42a3-88a8-9f878300c81d"
+        "price": 0.1649,
+        "last_update": 1762583372,
+        "from": "Local",
+        "last_time": 1762583372
     },
     "200021": {
-        "name": "Fossil of Truth",
+        "name": "Truth Fossil",
         "type": "Equipment Material",
-        "price": 27.4433,
-        "last_update": 1762569493,
+        "price": 28.8483,
+        "last_update": 1762583211,
         "from": "Local",
-        "last_time": 1762569493
+        "last_time": 1762583211
     },
     "200028": {
-        "name": "Precious Ashes",
+        "name": "Precious Ember",
         "type": "Equipment Material",
-        "price": 0.0097,
-        "last_time": 1762497491,
+        "price": 0.0075,
+        "last_time": 1762583385,
         "from": "Local",
-        "last_update": 1762497491
+        "last_update": 1762583385
     },
     "200029": {
-        "name": "Rare Ashes",
+        "name": "Matchless Ember",
         "type": "Equipment Material",
-        "price": 0.0301,
-        "last_update": 1762497489,
+        "price": 0.0309,
+        "last_update": 1762583392,
         "from": "Local",
-        "last_time": 1762497489
+        "last_time": 1762583392
     },
     "200030": {
         "name": "Ultimate Ember",
@@ -1361,11 +1393,12 @@
         "last_update": 1762577856
     },
     "210000": {
-        "name": "Demon Core",
+        "name": "Aemberon Core",
         "type": "Corrosion Material",
-        "price": 0.018,
-        "last_update": 1762492594.311722,
-        "from": "1df9ef48-963c-4f19-905d-d15e93fd858b"
+        "price": 0.0186,
+        "last_update": 1762583410,
+        "from": "Local",
+        "last_time": 1762583410
     },
     "210001": {
         "name": "Familiar Core",
@@ -1375,50 +1408,53 @@
         "from": "5249bb93-37f4-49f3-aaca-82e7b74d5a63"
     },
     "210002": {
-        "name": "Axis of Decay",
+        "name": "Corrupted Axis",
         "type": "Erosion Material",
-        "price": 5.947,
-        "last_update": 1762492594.311722,
-        "from": "c897b83c-224e-4b0a-9937-f7b0f887e8dc"
+        "price": 10.4921,
+        "last_update": 1762584561,
+        "from": "Local",
+        "last_time": 1762584561
     },
     "210003": {
-        "name": "Axis of Glory",
+        "name": "Glorious Axis",
         "type": "Erosion Material",
         "price": 222.967,
         "last_update": 1762492594.311722,
         "from": "c61b177a-7fdb-444c-baa3-da3e0fa8f256"
     },
     "300006": {
-        "name": "Holy Fossil",
+        "name": "Sacred Fossil",
         "type": "Equipment Material",
-        "price": 8.6526,
-        "last_update": 1762569491,
+        "price": 8.7342,
+        "last_update": 1762583202,
         "from": "Local",
-        "last_time": 1762569491
+        "last_time": 1762583202
     },
     "330001": {
-        "name": "Snow Paper Fragment",
+        "name": "Snowpaper Fragment",
         "type": "Special Item",
-        "price": 0.078,
-        "last_update": 1762492594.311722,
-        "from": "0c21fa4a-1002-4be5-9753-22101fbf015e"
+        "price": 0.0614,
+        "last_update": 1762584838,
+        "from": "Local",
+        "last_time": 1762584838
     },
     "338002": {
-        "name": "Star Catcher",
+        "name": "Star Net",
         "type": "Special Item",
         "price": 394.2,
         "last_update": 1762492594.311722,
         "from": "cf3ff756-db8b-4079-9ff0-2471bed892a2"
     },
     "339001": {
-        "name": "Crazy Inspiration",
+        "name": "Inspiration Essence",
         "type": "Special Item",
-        "price": 0.674,
-        "last_update": 1762492594.311722,
-        "from": "0282f13a-0e2f-49ae-814e-896431bb7fef"
+        "price": 1.4654,
+        "last_update": 1762584845,
+        "from": "Local",
+        "last_time": 1762584845
     },
     "360403": {
-        "name": "Basic Component",
+        "name": "Base Mod",
         "type": "Tower Material",
         "price": 0.2459,
         "last_time": 1762529448,
@@ -1426,7 +1462,7 @@
         "last_update": 1762529448
     },
     "360404": {
-        "name": "Expansion Component - Warlock",
+        "name": "Expansion Mod - Warlock",
         "type": "Tower Material",
         "price": 117.9333,
         "last_update": 1762542897,
@@ -1434,15 +1470,15 @@
         "last_time": 1762542897
     },
     "360405": {
-        "name": "Expansion Component - Guardian",
+        "name": "Expansion Mod - Vanguard",
         "type": "Tower Material",
-        "price": 72.6167,
-        "last_update": 1762529620,
+        "price": 76.7667,
+        "last_update": 1762583171,
         "from": "Local",
-        "last_time": 1762529620
+        "last_time": 1762583171
     },
     "360406": {
-        "name": "Expansion Component - Sniper",
+        "name": "Expansion Mod - Sniper",
         "type": "Tower Material",
         "price": 16.3267,
         "last_time": 1762499230,
@@ -1450,21 +1486,21 @@
         "last_update": 1762499230
     },
     "360407": {
-        "name": "Expansion Component - Reload",
+        "name": "Expansion Mod - Tank",
         "type": "Tower Material",
         "price": 39.3,
         "last_update": 1762492594.311722,
         "from": "4e0fdada-62cc-4c25-a61c-9c2b694839bc"
     },
     "370101": {
-        "name": "Prism Calibrator - Rare",
+        "name": "Prism Gauge - Rare",
         "type": "Overlay Material",
         "price": 0.031,
         "last_update": 1762492594.311722,
         "from": "3d565d8e-5b3c-49e0-8081-9d07f7260625"
     },
     "370201": {
-        "name": "Prism Calibrator - Legendary",
+        "name": "Prism Gauge - Legendary",
         "type": "Overlay Material",
         "price": 0.1877,
         "last_update": 1762534603,
@@ -1472,14 +1508,14 @@
         "last_time": 1762534603
     },
     "400006": {
-        "name": "Beacon of the Frozen Abyss (Time 7)",
+        "name": "Glacial Abyss Beacon (Time 7)",
         "type": "Map Ticket",
         "price": 0.774,
         "last_update": 1762492594.311722,
         "from": "3c7a6579-8cde-4c3e-8e12-0c85a4306452"
     },
     "400007": {
-        "name": "Beacon of the Frozen Abyss (Time 8)",
+        "name": "Glacial Abyss Beacons (Time 8)",
         "type": "Map Ticket",
         "price": 2.4972,
         "last_update": 1762494217,
@@ -1495,29 +1531,29 @@
         "last_time": 1762493743
     },
     "400014": {
-        "name": "Beacon in the Boiling Sea (Time 7)",
+        "name": "Blistering Lava Sea Beacon (Time 7)",
         "type": "Map Ticket",
         "price": 1.152,
         "last_update": 1762492594.311722,
         "from": "e2be4885-4940-462b-bc26-a4aa3c8dbb91"
     },
     "400015": {
-        "name": "Beacon in the Boiling Sea (Time 8)",
+        "name": "Blistering Lava Sea Beacon (Time 8)",
         "type": "Map Ticket",
-        "price": 1.5738,
-        "last_update": 1762530338,
+        "price": 1.6974,
+        "last_update": 1762583029,
         "from": "Local",
-        "last_time": 1762530338
+        "last_time": 1762583029
     },
     "400021": {
-        "name": "Beacon in the Iron Realm (Time 7)",
+        "name": "Steel Forge Beacon (Time 7)",
         "type": "Map Ticket",
         "price": 0.657,
         "last_update": 1762492594.311722,
         "from": "e2be4885-4940-462b-bc26-a4aa3c8dbb91"
     },
     "400022": {
-        "name": "Beacon in the Iron Realm (Time 8)",
+        "name": "Steel Forge Beacon (Time 8)",
         "type": "Map Ticket",
         "price": 0.9953,
         "last_update": 1762493753,
@@ -1525,14 +1561,14 @@
         "last_time": 1762493753
     },
     "400027": {
-        "name": "Beacon in the Thunder Wasteland (Time 7)",
+        "name": "Thunder Wastes Beacon (Time 7)",
         "type": "Map Ticket",
         "price": 0.938,
         "last_update": 1762492594.311722,
         "from": "e2be4885-4940-462b-bc26-a4aa3c8dbb91"
     },
     "400028": {
-        "name": "Beacon in the Thunder Wasteland (Time 8)",
+        "name": "Thunder Wastes Beacon (Time 8)",
         "type": "Map Ticket",
         "price": 1.1583,
         "last_update": 1762493750,
@@ -1540,129 +1576,134 @@
         "last_time": 1762493750
     },
     "400032": {
-        "name": "Beacon in the Dark Night (Time 7)",
+        "name": "Voidlands Beacon (Time 7)",
         "type": "Map Ticket",
         "price": 0.709,
         "last_update": 1762492594.311722,
         "from": "526cf426-2805-4903-9ce0-57c020e12d29"
     },
     "400033": {
-        "name": "Beacon in the Dark Night (Time 8)",
+        "name": "Voidlands Beacon (Time 8)",
         "type": "Map Ticket",
-        "price": 1.0814,
-        "last_update": 1762493748,
+        "price": 1.2602,
+        "last_update": 1762582993,
         "from": "Local",
-        "last_time": 1762493748
+        "last_time": 1762582993
     },
     "410101": {
-        "name": "Command: Answer the Question",
+        "name": "Edict: Dart",
         "type": "Boss Ticket",
-        "price": 11.763,
-        "last_time": 1760861329,
-        "from": "8128de50-a647-43b9-a8f2-acf96801ef22",
-        "last_update": 1762492594.311722
+        "price": 13.8829,
+        "last_time": 1762584694,
+        "from": "Local",
+        "last_update": 1762584694
     },
     "410102": {
-        "name": "Command: Diwo",
+        "name": "Edict: Dive",
         "type": "Boss Ticket",
-        "price": 10.515,
-        "last_update": 1762492594.311722,
-        "from": "94e707e1-21f7-4ebd-8743-e890730f5378"
+        "price": 11.543,
+        "last_update": 1762584707,
+        "from": "Local",
+        "last_time": 1762584707
     },
     "410103": {
-        "name": "Imperial Decree: Lu Yin",
+        "name": "Edict: Ruin",
         "type": "BOSS Ticket",
-        "price": 11.462,
-        "last_update": 1762492594.311722,
-        "from": "8128de50-a647-43b9-a8f2-acf96801ef22"
+        "price": 12.0449,
+        "last_update": 1762584716,
+        "from": "Local",
+        "last_time": 1762584716
     },
     "410104": {
-        "name": "Imperial Decree: Du Mu",
+        "name": "Edict: Doom",
         "type": "BOSS Ticket",
         "price": 33.997,
         "last_update": 1762492594.311722,
         "from": "b0d63c90-2e00-4ad6-a735-744d7bccd5ef"
     },
     "410201": {
-        "name": "Invitation to the Void Sea - Desire",
+        "name": "Void Sea Invitation - Craving",
         "type": "BOSS Ticket",
-        "price": 19.197,
-        "last_update": 1762492594.311722,
-        "from": "30d2be77-4c80-4d52-a7f4-6a3497ec59f4"
+        "price": 17.4106,
+        "last_update": 1762584733,
+        "from": "Local",
+        "last_time": 1762584733
     },
     "410202": {
-        "name": "Invitation to the Void Sea - Ecstasy",
+        "name": "Void Sea Invitation - Ecstasy",
         "type": "BOSS Ticket",
         "price": 38.626,
         "last_update": 1762492594.311722,
         "from": "30d2be77-4c80-4d52-a7f4-6a3497ec59f4"
     },
     "410203": {
-        "name": "Invitation to the Void Sea - Ouch",
+        "name": "Void Sea Invitation - Sorrow",
         "type": "BOSS Ticket",
         "price": 36.433,
         "last_update": 1762492594.311722,
         "from": "f4e76250-7ed7-4f15-be09-17a075faa087"
     },
     "410301": {
-        "name": "Proto-nucleus of Desire - Record",
+        "name": "Desire Core - Record",
         "type": "BOSS Ticket",
-        "price": 98.1667,
-        "last_update": 1762494386,
+        "price": 99.5426,
+        "last_update": 1762583424,
         "from": "Local",
-        "last_time": 1762494386
+        "last_time": 1762583424
     },
     "410302": {
-        "name": "Proto-nucleus of Desire - Creation",
+        "name": "Desire Core - Creation",
         "type": "BOSS Ticket",
         "price": 172.577,
         "last_update": 1762492594.311722,
         "from": "7366b0c7-ab6f-43af-9286-2ab2ce5ea54b"
     },
     "410303": {
-        "name": "Desire Pronucleus - Destruction",
+        "name": "Desire Core - Devastation",
         "type": "BOSS Ticket",
         "price": 238.867,
         "last_update": 1762492594.311722,
         "from": "7366b0c7-ab6f-43af-9286-2ab2ce5ea54b"
     },
     "410401": {
-        "name": "Queen🕯 - Imprisonment",
+        "name": "Queen's Wick - Imprisoned",
         "type": "BOSS Ticket",
-        "price": 29.833,
-        "last_update": 1762492594.311722,
-        "from": "cf1f4d4a-d375-4ffa-a3d0-2d4125bb2be5"
+        "price": 18.3122,
+        "last_update": 1762583468,
+        "from": "Local",
+        "last_time": 1762583468
     },
     "410402": {
-        "name": "Queen🕯 - Pursuit",
+        "name": "Queen's Wick - Pursuit",
         "type": "BOSS Ticket",
         "price": 137.5,
         "last_update": 1762492594.311722,
         "from": "5db4b4e1-8c76-46ec-8829-cf90409fdc02"
     },
     "410403": {
-        "name": "Queen🕯 - Learning Hate",
+        "name": "Queen's Wick - Revenge",
         "type": "BOSS Ticket",
         "price": 26619.422,
         "last_update": 1762492594.311722,
         "from": "bcad9efa-3b0d-471d-b665-523dbb65a604"
     },
     "410501": {
-        "name": "Queen's Favor - Conquest",
+        "name": "Queen's Grace - Slaughter",
         "type": "BOSS Ticket",
-        "price": 0.846,
-        "last_update": 1762492594.311722,
-        "from": "0203aac6-a468-48c3-ada5-1edd3880925e"
+        "price": 0.9293,
+        "last_update": 1762583475,
+        "from": "Local",
+        "last_time": 1762583475
     },
     "410502": {
-        "name": "Queen's Favor - Power",
+        "name": "Queen's Grace - Authority",
         "type": "BOSS Ticket",
         "price": 9.847,
         "last_update": 1762492594.311722,
         "from": "fc1031fb-e8dc-4959-ae6f-d2cfd6105604"
     },
     "410503": {
-        "name": "Queen's Favor - Desire",
+        "name": "Queen's Grace - Lust",
         "type": "Boss Ticket",
         "price": 1.873,
         "last_update": 1762492594.311722,
@@ -1671,40 +1712,44 @@
     "430000": {
         "name": "The Beginning",
         "type": "Boss Ticket",
-        "price": 2.295,
-        "last_update": 1762492594.311722,
-        "from": "5c627652-03f0-436c-b5a9-c232d633c135"
+        "price": 3.9773,
+        "last_update": 1762583511,
+        "from": "Local",
+        "last_time": 1762583511
     },
     "430001": {
-        "name": "The Beginning of the Beginning",
+        "name": "The End",
         "type": "Boss Ticket",
-        "price": 1.548,
-        "last_update": 1762492594.311722,
-        "from": "e1c66972-c2cc-40be-8642-356f7862f24f"
+        "price": 3.5534,
+        "last_update": 1762584630,
+        "from": "Local",
+        "last_time": 1762584630
     },
     "430002": {
-        "name": "The Beginning of the End",
+        "name": "Beginning of the End",
         "type": "Boss Ticket",
-        "price": 8.486,
-        "last_update": 1762492594.311722,
-        "from": "eb0b1986-9b35-4ca1-a227-a96ec59d413c"
+        "price": 12.4803,
+        "last_update": 1762583520,
+        "from": "Local",
+        "last_time": 1762583520
     },
     "440001": {
-        "name": "God's Emblem - Mechanical",
+        "name": "Divinity Emblem - Machine",
         "type": "God's Emblem",
-        "price": 3.185,
-        "last_update": 1762492594.311722,
-        "from": "cde7bf4e-e343-4e7e-8e2c-f9e7cf334fc8"
+        "price": 1.4489,
+        "last_update": 1762584641,
+        "from": "Local",
+        "last_time": 1762584641
     },
     "440002": {
-        "name": "God's Emblem - Great Strength",
+        "name": "Divinity Emblem - Might",
         "type": "God's Emblem",
         "price": 18.068,
         "last_update": 1762492594.311722,
         "from": "b6bc0191-e5bf-4e77-a2b4-1aa3113612ff"
     },
     "440003": {
-        "name": "God's Emblem - Conquest",
+        "name": "Divinity Emblem - War",
         "type": "God's Emblem",
         "price": 85.167,
         "last_update": 1762492594.311722,
@@ -1712,21 +1757,22 @@
         "last_time": 1762190242
     },
     "440004": {
-        "name": "God's Emblem - Hunting",
+        "name": "Divinity Emblem - Hunting",
         "type": "God's Emblem",
         "price": 2.427,
         "last_update": 1762492594.311722,
         "from": "89640605-fe82-41e5-8108-7f2d466dc2b9"
     },
     "990005": {
-        "name": "The Essence of the Mist",
+        "name": "Mist Essence",
         "type": "Game Ticket",
-        "price": 79.758,
-        "last_update": 1762492594.311722,
-        "from": "660cd06a-aa6b-4a52-b1d7-6feb35e91ac0"
+        "price": 79.4668,
+        "last_update": 1762584822,
+        "from": "Local",
+        "last_time": 1762584822
     },
     "990007": {
-        "name": "Resident 😰 Eyes",
+        "name": "Resident's Eyes",
         "type": "Game Ticket",
         "price": 0.557,
         "last_update": 1762492594.311722,
@@ -1739,45 +1785,40 @@
         "last_update": 1762492594.311722
     },
     "3000001": {
-        "name": "Proof of the Weak I",
+        "name": "Proof of the Brave I",
         "type": "Game Ticket",
-        "price": 0.039,
-        "last_update": 1762492594.311722,
-        "from": "9a6daefb-c8e0-4c71-bdfc-ba6844493a2c"
+        "price": 0.0452,
+        "last_update": 1762583350,
+        "from": "Local",
+        "last_time": 1762583350
     },
     "3000002": {
-        "name": "Proof of the Weak II",
+        "name": "Proof of the Brave II",
         "type": "Game Ticket",
         "price": 0.067,
         "last_update": 1762492594.311722,
         "from": "9756d259-191a-4cfd-bc51-f5ede59f79a6"
     },
     "3000003": {
-        "name": "Proof of the Strong III",
+        "name": "Proof of the Brave III",
         "type": "Game Ticket",
         "price": 3.796,
         "last_update": 1762492594.311722,
         "from": "05d8eeca-6e38-437f-9045-1954860c9f94"
     },
     "3000004": {
-        "name": "Brave Proof IV",
+        "name": "Proof of the Brave IV",
         "type": "Gameplay Ticket",
         "price": 28.642,
         "last_update": 1762492594.311722,
         "from": "2f356f04-c0a3-4f6a-9711-1030c6a194e6"
     },
     "3000005": {
-        "name": "Superman Proof V",
+        "name": "Proof of the Brave V",
         "type": "Gameplay Ticket",
-        "price": 26.617,
-        "last_update": 1762492594.311722,
-        "from": "342d5ba2-138e-45dc-b03b-b3316074f52b"
-    },
-    "6055": {
-        "name": "安东尼奥的研究",
-        "type": "记忆荧光",
-        "price": 90.486,
-        "last_update": 1761164929,
-        "from": "5db4b4e1-8c76-46ec-8829-cf90409fdc02"
+        "price": 27.6625,
+        "last_update": 1762581681,
+        "from": "Local",
+        "last_time": 1762581681
     }
 }
