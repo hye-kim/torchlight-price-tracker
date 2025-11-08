@@ -5,8 +5,6 @@ This is a refactored version with better code organization, error handling,
 type hints, logging, and thread safety.
 """
 
-import sys
-import os
 import logging
 import time
 import threading
@@ -14,9 +12,6 @@ import tkinter as tk
 from tkinter import messagebox, ttk, StringVar, Listbox, END
 from typing import Optional, Dict, Any
 import ctypes
-
-# Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
 from src.constants import (
     APP_TITLE,
@@ -688,16 +683,6 @@ def main():
     game_detector = GameDetector()
     game_found, log_file_path = game_detector.detect_game()
 
-    if not game_found:
-        messagebox.showwarning(
-            "Game Not Found",
-            "Could not find Torchlight: Infinite game process or log file.\n\n"
-            "The tool will continue running but won't be able to track drops "
-            "until the game is started.\n\n"
-            "Please make sure the game is running with logging enabled, "
-            "then restart this tool."
-        )
-
     # Create and run the application
     app = TrackerApp(
         config_manager,
@@ -706,6 +691,18 @@ def main():
         statistics_tracker,
         log_file_path
     )
+
+    # Show game not found warning after app is created (deferred)
+    if not game_found:
+        logger.warning("Game not found - tracker will run without log monitoring")
+        app.after(100, lambda: messagebox.showwarning(
+            "Game Not Found",
+            "Could not find Torchlight: Infinite game process or log file.\n\n"
+            "The tool will continue running but won't be able to track drops "
+            "until the game is started.\n\n"
+            "Please make sure the game is running with logging enabled, "
+            "then restart this tool."
+        ))
 
     # Start log monitoring thread
     monitor = LogMonitorThread(

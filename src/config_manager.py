@@ -75,7 +75,11 @@ class ConfigManager:
             with open(self.config_file, 'r', encoding='utf-8') as f:
                 config_dict = json.load(f)
 
-            self._config = AppConfig(**config_dict)
+            # Filter to only known fields for backward compatibility
+            known_fields = {'opacity', 'tax', 'user'}
+            filtered_config = {k: v for k, v in config_dict.items() if k in known_fields}
+
+            self._config = AppConfig(**filtered_config)
             logger.info("Configuration loaded successfully")
             return self._config
 
@@ -86,7 +90,9 @@ class ConfigManager:
             return self._config
         except TypeError as e:
             logger.error(f"Invalid configuration format: {e}")
-            raise ValueError(f"Invalid configuration: {e}")
+            logger.warning("Falling back to default configuration")
+            self._config = AppConfig(**DEFAULT_CONFIG)
+            return self._config
 
     def save(self, config: Optional[AppConfig] = None) -> None:
         """
