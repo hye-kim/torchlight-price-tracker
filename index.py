@@ -88,7 +88,6 @@ class TrackerApp(tk.Tk):
 
         self._setup_window()
         self._create_widgets()
-        self._apply_config()
 
         self.protocol("WM_DELETE_WINDOW", self.exit_app)
 
@@ -543,34 +542,6 @@ class TrackerApp(tk.Tk):
         self.chose.pack(side="left")
         self.chose.bind("<<ComboboxSelected>>", lambda e: self.change_tax(self.chose.current()))
 
-        # Opacity settings card
-        opacity_card = ttk.Frame(main_frame, style='Card.TFrame')
-        opacity_card.pack(fill="x", pady=(0, 15))
-
-        opacity_content = ttk.Frame(opacity_card, style='Card.TFrame')
-        opacity_content.pack(fill="x", padx=15, pady=15)
-
-        opacity_title = ttk.Label(
-            opacity_content, text="WINDOW OPACITY",
-            style='Status.TLabel'
-        )
-        opacity_title.pack(side="top", anchor="w", pady=(0, 10))
-
-        opacity_row = ttk.Frame(opacity_content, style='Card.TFrame')
-        opacity_row.pack(fill="x")
-
-        label_opacity = ttk.Label(opacity_row, text="Transparency:", style='TLabel')
-        label_opacity.pack(side="left", padx=(0, 10))
-
-        self.scale_opacity = ttk.Scale(
-            opacity_row,
-            from_=0.1, to=1.0, orient=tk.HORIZONTAL,
-            command=self.change_opacity,
-            length=200
-        )
-        self.scale_opacity.pack(side="left", fill="x", expand=True)
-        self.scale_opacity.set(config.opacity)
-
         # Actions card
         actions_card = ttk.Frame(main_frame, style='Card.TFrame')
         actions_card.pack(fill="x", pady=0)
@@ -586,7 +557,7 @@ class TrackerApp(tk.Tk):
 
         reset_button = ttk.Button(
             actions_content,
-            text="Reset Tracking Data",
+            text="Reset Statistics",
             style='Danger.TButton',
             cursor="hand2",
             command=self.reset_tracking
@@ -594,11 +565,6 @@ class TrackerApp(tk.Tk):
         reset_button.pack(fill="x")
 
         self.inner_pannel_settings.protocol("WM_DELETE_WINDOW", self.inner_pannel_settings.withdraw)
-
-    def _apply_config(self) -> None:
-        """Apply configuration settings to the window."""
-        config = self.config_manager.get()
-        self.change_opacity(config.opacity)
 
     def start_initialization(self) -> None:
         """Start the inventory initialization process."""
@@ -653,21 +619,23 @@ class TrackerApp(tk.Tk):
             self.quit()
 
     def reset_tracking(self) -> None:
-        """Reset all tracking data."""
+        """Reset tracking statistics while preserving inventory initialization."""
         if messagebox.askyesno(
-            "Reset Tracking",
-            "Are you sure you want to reset all tracking data? "
-            "This will clear all drop statistics."
+            "Reset Statistics",
+            "Are you sure you want to reset all tracking statistics? "
+            "This will clear all drop statistics and map counts.\n\n"
+            "Your inventory initialization will be preserved."
         ):
-            self.inventory_tracker.reset()
+            # Reset statistics only, preserve inventory state
             self.statistics_tracker.reset()
 
+            # Update UI to show reset state
             self.label_current_earn.config(text="🔥 0 total")
             self.label_map_count.config(text="🎫 0 maps")
             self.inner_pannel_drop_listbox.delete(1, END)
-            self.label_initialize_status.config(text="Not initialized", foreground=self.colors['text_secondary'])
+            # Don't reset initialization status - preserve it
 
-            messagebox.showinfo("Reset Complete", "All tracking data has been reset.")
+            messagebox.showinfo("Reset Complete", "Statistics have been reset. Inventory initialization preserved.")
 
     def change_tax(self, value: int) -> None:
         """
@@ -678,24 +646,6 @@ class TrackerApp(tk.Tk):
         """
         self.config_manager.update_tax(value)
         logger.info(f"Tax setting changed to: {'Enabled' if value else 'Disabled'}")
-
-    def change_opacity(self, value: float) -> None:
-        """
-        Change window opacity.
-
-        Args:
-            value: Opacity value (0.1 to 1.0).
-        """
-        opacity = float(value)
-        self.config_manager.update_opacity(opacity)
-
-        self.attributes('-alpha', opacity)
-
-        if hasattr(self, 'inner_pannel_drop') and self.inner_pannel_drop.winfo_exists():
-            self.inner_pannel_drop.attributes('-alpha', opacity)
-
-        if hasattr(self, 'inner_pannel_settings') and self.inner_pannel_settings.winfo_exists():
-            self.inner_pannel_settings.attributes('-alpha', opacity)
 
     def change_states(self) -> None:
         """Toggle between current map and all drops view."""
