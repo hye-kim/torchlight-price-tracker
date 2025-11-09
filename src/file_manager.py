@@ -5,6 +5,7 @@ Handles reading and writing JSON files with proper error handling.
 
 import json
 import logging
+import time
 from pathlib import Path
 from typing import Dict, Any, Optional
 from datetime import datetime
@@ -203,6 +204,7 @@ class FileManager:
         """
         Update a single item in the table.
         Uses API if enabled for efficient updates, otherwise updates local file.
+        Only makes PUT requests to the API if the last update was over 1 hour ago.
 
         Args:
             item_id: The item ID to update.
@@ -214,20 +216,45 @@ class FileManager:
         # If API is enabled, use API for efficient update
         if self.api_client:
             try:
-                updated = self.api_client.update_item(item_id, updates)
-                if updated:
-                    # Also update local cache
+                # Get current item data to check timestamp
+                current_item = self.api_client.get_item(item_id)
+
+                # Check if enough time has passed since last update (1 hour = 3600 seconds)
+                should_update_api = True
+                if current_item:
+                    last_update = current_item.get('last_update', 0)
+                    current_time = time.time()
+                    time_since_update = current_time - last_update
+
+                    if time_since_update < 3600:
+                        logger.info(f"Skipping API update for item {item_id}: last updated {time_since_update:.0f} seconds ago (< 1 hour)")
+                        should_update_api = False
+
+                # Only make PUT request if enough time has passed or no timestamp found
+                if should_update_api:
+                    updated = self.api_client.update_item(item_id, updates)
+                    if updated:
+                        # Also update local cache
+                        if self._full_table_cache and item_id in self._full_table_cache:
+                            self._full_table_cache[item_id].update(updates)
+                        # Also update local file as backup
+                        full_table = self.load_json(FULL_TABLE_FILE, {})
+                        if item_id in full_table:
+                            full_table[item_id].update(updates)
+                            self.save_json(FULL_TABLE_FILE, full_table)
+                        logger.debug(f"Updated item {item_id} via API")
+                        return True
+                    else:
+                        logger.warning(f"Failed to update item {item_id} via API")
+                else:
+                    # Still update local cache and file even if skipping API update
                     if self._full_table_cache and item_id in self._full_table_cache:
                         self._full_table_cache[item_id].update(updates)
-                    # Also update local file as backup
                     full_table = self.load_json(FULL_TABLE_FILE, {})
                     if item_id in full_table:
                         full_table[item_id].update(updates)
                         self.save_json(FULL_TABLE_FILE, full_table)
-                    logger.debug(f"Updated item {item_id} via API")
                     return True
-                else:
-                    logger.warning(f"Failed to update item {item_id} via API")
             except Exception as e:
                 logger.error(f"Error updating item via API: {e}")
 
