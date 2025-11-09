@@ -48,18 +48,30 @@ from src.statistics_tracker import StatisticsTracker
 from src.game_detector import GameDetector
 
 # Setup logging with UTF-8 encoding to handle Unicode characters
+# Note: When running as a GUI application (console=False), sys.stdout may be None
+handlers = [logging.FileHandler('tracker.log', encoding='utf-8')]
+
+# Only add console handler if stdout exists (i.e., when running with console)
+if sys.stdout is not None:
+    stream_handler = logging.StreamHandler(sys.stdout)
+    handlers.append(stream_handler)
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('tracker.log', encoding='utf-8'),
-        logging.StreamHandler(sys.stdout)
-    ]
+    handlers=handlers
 )
-# Set the StreamHandler to use UTF-8 encoding
+
+# Set the StreamHandler to use UTF-8 encoding (only if stream exists and supports reconfigure)
 for handler in logging.root.handlers:
-    if isinstance(handler, logging.StreamHandler) and handler.stream == sys.stdout:
-        handler.stream.reconfigure(encoding='utf-8')
+    if isinstance(handler, logging.StreamHandler) and handler.stream is not None:
+        try:
+            if hasattr(handler.stream, 'reconfigure'):
+                handler.stream.reconfigure(encoding='utf-8')
+        except (AttributeError, OSError):
+            # Ignore if reconfigure fails or isn't supported
+            pass
+
 logger = logging.getLogger(__name__)
 
 
