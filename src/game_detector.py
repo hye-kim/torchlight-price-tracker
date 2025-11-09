@@ -5,7 +5,6 @@ Handles finding the game process and log file.
 
 import logging
 import os
-from pathlib import Path
 from typing import Optional, Tuple
 
 try:

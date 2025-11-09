@@ -9,7 +9,6 @@ import logging
 import time
 import threading
 from typing import Optional, Dict, Any
-import ctypes
 import sys
 from datetime import datetime
 
@@ -19,7 +18,6 @@ from PyQt5.QtWidgets import (
     QFileDialog
 )
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QObject
-from PyQt5.QtGui import QFont
 
 from src.constants import (
     APP_TITLE,
