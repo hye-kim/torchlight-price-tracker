@@ -37,13 +37,20 @@ class APIClient:
         Make HTTP request with retry logic.
 
         Args:
-            method: HTTP method (GET, POST, PUT, DELETE)
+            method: HTTP method (GET, POST, PUT)
             endpoint: API endpoint path
             **kwargs: Additional arguments to pass to requests
 
         Returns:
             Response object or None if all retries failed
+
+        Raises:
+            ValueError: If DELETE method is attempted
         """
+        # Prevent DELETE requests
+        if method.upper() == 'DELETE':
+            raise ValueError("DELETE requests are not allowed by this application")
+
         url = f"{self.base_url}{endpoint}"
         kwargs.setdefault('timeout', self.timeout)
 
@@ -214,15 +221,11 @@ class APIClient:
 
         Returns:
             True if deletion succeeded, False otherwise
+
+        Raises:
+            NotImplementedError: DELETE operations are disabled for this application
         """
-        response = self._make_request('DELETE', f'/items/{item_id}')
-        if response:
-            # Remove from cache
-            with self._cache_lock:
-                self._cache.pop(item_id, None)
-            logger.info(f"Deleted item {item_id}")
-            return True
-        return False
+        raise NotImplementedError("DELETE requests are not allowed. This application does not support deleting items via the API.")
 
     def get_item_types(self) -> Optional[list]:
         """
