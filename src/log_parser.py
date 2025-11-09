@@ -109,6 +109,7 @@ class LogParser:
     def update_prices_in_table(self, text: str) -> int:
         """
         Extract prices from log and update the full table.
+        Uses efficient API updates when available.
 
         Args:
             text: Log text to parse.
@@ -120,23 +121,43 @@ class LogParser:
         if not price_updates:
             return 0
 
-        full_table = self.file_manager.load_full_table()
         update_count = 0
         current_time = round(time.time())
 
-        for item_id, price in price_updates:
-            if item_id in full_table:
-                full_table[item_id]['last_time'] = current_time
-                full_table[item_id]['from'] = "Local"
-                full_table[item_id]['price'] = price
-                full_table[item_id]['last_update'] = current_time
+        # If API is enabled, update items individually for efficiency
+        if self.file_manager.api_client:
+            full_table = self.file_manager.load_full_table()
 
-                item_name = full_table[item_id].get("name", item_id)
-                logger.info(f'Updated price: {item_name} (ID:{item_id}) = {price}')
-                update_count += 1
+            for item_id, price in price_updates:
+                if item_id in full_table:
+                    updates = {
+                        'last_time': current_time,
+                        'from': "Local",
+                        'price': price,
+                        'last_update': current_time
+                    }
 
-        if update_count > 0:
-            self.file_manager.save_full_table(full_table)
+                    if self.file_manager.update_item(item_id, updates):
+                        item_name = full_table[item_id].get("name", item_id)
+                        logger.info(f'Updated price: {item_name} (ID:{item_id}) = {price}')
+                        update_count += 1
+        else:
+            # Use batch update for local file
+            full_table = self.file_manager.load_full_table()
+
+            for item_id, price in price_updates:
+                if item_id in full_table:
+                    full_table[item_id]['last_time'] = current_time
+                    full_table[item_id]['from'] = "Local"
+                    full_table[item_id]['price'] = price
+                    full_table[item_id]['last_update'] = current_time
+
+                    item_name = full_table[item_id].get("name", item_id)
+                    logger.info(f'Updated price: {item_name} (ID:{item_id}) = {price}')
+                    update_count += 1
+
+            if update_count > 0:
+                self.file_manager.save_full_table(full_table)
 
         return update_count
 
