@@ -2,7 +2,67 @@
 Constants used throughout the Torchlight Infinite Price Tracker application.
 """
 
+import os
+import sys
 from typing import List
+
+
+def get_resource_path(relative_path: str) -> str:
+    """
+    Get absolute path to resource, works for dev and for PyInstaller.
+
+    For user-modifiable files (like config.json), this function will:
+    1. First check in the directory where the executable/script is located
+    2. Fall back to the bundled resource if not found
+
+    Args:
+        relative_path: Relative path to the resource file
+
+    Returns:
+        Absolute path to the resource
+    """
+    # Get the directory where the executable or script is located
+    if getattr(sys, 'frozen', False):
+        # Running as compiled executable
+        application_path = os.path.dirname(sys.executable)
+    else:
+        # Running as script
+        application_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+    # Check if file exists in application directory (user's config)
+    user_file_path = os.path.join(application_path, relative_path)
+    if os.path.exists(user_file_path):
+        return user_file_path
+
+    # Fall back to bundled resource for frozen apps
+    if getattr(sys, 'frozen', False):
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = getattr(sys, '_MEIPASS', application_path)
+        return os.path.join(base_path, relative_path)
+
+    # For development, return the normal path
+    return user_file_path
+
+
+def get_writable_path(relative_path: str) -> str:
+    """
+    Get writable path for user data files.
+    Always returns path in the directory where the executable/script is located.
+
+    Args:
+        relative_path: Relative path to the file
+
+    Returns:
+        Absolute writable path
+    """
+    if getattr(sys, 'frozen', False):
+        # Running as compiled executable
+        application_path = os.path.dirname(sys.executable)
+    else:
+        # Running as script
+        application_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+    return os.path.join(application_path, relative_path)
 
 # Application Information
 APP_NAME = "Torchlight Price Checker"
