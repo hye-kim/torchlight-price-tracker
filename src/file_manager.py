@@ -15,7 +15,9 @@ from .constants import (
     TRANSLATION_MAPPING_FILE,
     EN_ID_TABLE_FILE,
     DROP_LOG_FILE,
-    CONFIG_FILE
+    CONFIG_FILE,
+    get_resource_path,
+    get_writable_path
 )
 from .api_client import APIClient
 
@@ -49,12 +51,15 @@ class FileManager:
     def _load_config(self) -> Dict[str, Any]:
         """
         Load configuration from config.json.
+        First checks for user config next to executable, then falls back to bundled version.
 
         Returns:
             Configuration dictionary.
         """
         try:
-            with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
+            config_path = get_resource_path(CONFIG_FILE)
+            logger.info(f"Loading config from: {config_path}")
+            with open(config_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except (FileNotFoundError, json.JSONDecodeError) as e:
             logger.warning(f"Could not load config: {e}, using defaults")
@@ -63,24 +68,30 @@ class FileManager:
     def ensure_file_exists(self, filepath: str, default_content: Any) -> None:
         """
         Ensure a file exists, creating it with default content if it doesn't.
+        Uses writable path to ensure file can be created next to executable.
 
         Args:
             filepath: Path to the file.
             default_content: Default content to write if file doesn't exist.
         """
-        path = Path(filepath)
-        if not path.exists():
-            logger.info(f"Creating file: {filepath}")
+        # Check both user location and bundled location
+        writable_path = get_writable_path(filepath)
+        resource_path = get_resource_path(filepath)
+
+        # If file doesn't exist in either location, create it in writable location
+        if not Path(writable_path).exists() and not Path(resource_path).exists():
+            logger.info(f"Creating file: {writable_path}")
             try:
-                with open(path, 'w', encoding='utf-8') as f:
+                with open(writable_path, 'w', encoding='utf-8') as f:
                     json.dump(default_content, f, ensure_ascii=False, indent=4)
             except IOError as e:
-                logger.error(f"Failed to create file {filepath}: {e}")
+                logger.error(f"Failed to create file {writable_path}: {e}")
                 raise
 
     def load_json(self, filepath: str, default: Any = None) -> Any:
         """
         Load JSON data from a file.
+        First checks user location, then falls back to bundled resource.
 
         Args:
             filepath: Path to the JSON file.
@@ -90,7 +101,8 @@ class FileManager:
             Loaded JSON data or default value.
         """
         try:
-            with open(filepath, 'r', encoding='utf-8') as f:
+            resolved_path = get_resource_path(filepath)
+            with open(resolved_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except FileNotFoundError:
             logger.warning(f"File not found: {filepath}")
@@ -105,6 +117,7 @@ class FileManager:
     def save_json(self, filepath: str, data: Any) -> bool:
         """
         Save JSON data to a file.
+        Always writes to writable location (next to executable).
 
         Args:
             filepath: Path to the JSON file.
@@ -114,11 +127,12 @@ class FileManager:
             True if successful, False otherwise.
         """
         try:
-            with open(filepath, 'w', encoding='utf-8') as f:
+            writable_path = get_writable_path(filepath)
+            with open(writable_path, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=4, ensure_ascii=False)
             return True
         except IOError as e:
-            logger.error(f"Error writing to {filepath}: {e}")
+            logger.error(f"Error writing to {writable_path}: {e}")
             return False
 
     def load_full_table(self, use_cache: bool = True) -> Dict[str, Any]:
@@ -295,8 +309,8 @@ class FileManager:
         Returns:
             True if initialization was performed, False otherwise.
         """
-        full_table_path = Path(FULL_TABLE_FILE)
-        en_table_path = Path(EN_ID_TABLE_FILE)
+        full_table_path = Path(get_resource_path(FULL_TABLE_FILE))
+        en_table_path = Path(get_resource_path(EN_ID_TABLE_FILE))
 
         if full_table_path.exists():
             logger.debug("full_table.json already exists")
@@ -332,6 +346,7 @@ class FileManager:
     def append_to_drop_log(self, message: str) -> None:
         """
         Append a message to the drop log file with timestamp.
+        Writes to writable location.
 
         Args:
             message: Message to append.
@@ -339,7 +354,8 @@ class FileManager:
         try:
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             log_line = f"[{timestamp}] {message}\n"
-            with open(DROP_LOG_FILE, 'a', encoding='utf-8') as f:
+            drop_log_path = get_writable_path(DROP_LOG_FILE)
+            with open(drop_log_path, 'a', encoding='utf-8') as f:
                 f.write(log_line)
         except IOError as e:
             logger.error(f"Error writing to drop log: {e}")

@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 from dataclasses import dataclass, asdict
 
-from .constants import CONFIG_FILE, DEFAULT_CONFIG
+from .constants import CONFIG_FILE, DEFAULT_CONFIG, get_resource_path, get_writable_path
 
 logger = logging.getLogger(__name__)
 
@@ -35,27 +35,33 @@ class ConfigManager:
         Initialize the configuration manager.
 
         Args:
-            config_file: Path to the configuration file.
+            config_file: Path to the configuration file (relative path).
         """
-        self.config_file = Path(config_file)
+        self.config_file_name = config_file  # Store the relative path
         self._config: Optional[AppConfig] = None
         self._ensure_config_exists()
 
     def _ensure_config_exists(self) -> None:
-        """Create default configuration file if it doesn't exist."""
-        if not self.config_file.exists():
-            logger.info(f"Creating default configuration file: {self.config_file}")
+        """Create default configuration file if it doesn't exist in writable location."""
+        resource_path = Path(get_resource_path(self.config_file_name))
+        writable_path = Path(get_writable_path(self.config_file_name))
+
+        # If file doesn't exist in either location, create it in writable location
+        if not resource_path.exists() and not writable_path.exists():
+            logger.info(f"Creating default configuration file: {writable_path}")
             self._save_dict(DEFAULT_CONFIG)
 
     def _save_dict(self, config_dict: Dict[str, Any]) -> None:
         """
         Save configuration dictionary to file.
+        Always saves to writable location (next to executable).
 
         Args:
             config_dict: Configuration dictionary to save.
         """
         try:
-            with open(self.config_file, 'w', encoding='utf-8') as f:
+            writable_path = get_writable_path(self.config_file_name)
+            with open(writable_path, 'w', encoding='utf-8') as f:
                 json.dump(config_dict, f, ensure_ascii=False, indent=4)
         except IOError as e:
             logger.error(f"Failed to save configuration: {e}")
@@ -64,6 +70,7 @@ class ConfigManager:
     def load(self) -> AppConfig:
         """
         Load configuration from file.
+        Reads from resource path (checks user location first, then bundled).
 
         Returns:
             Loaded and validated configuration.
@@ -72,7 +79,9 @@ class ConfigManager:
             ValueError: If configuration file is invalid.
         """
         try:
-            with open(self.config_file, 'r', encoding='utf-8') as f:
+            config_path = get_resource_path(self.config_file_name)
+            logger.info(f"Loading config from: {config_path}")
+            with open(config_path, 'r', encoding='utf-8') as f:
                 config_dict = json.load(f)
 
             # Filter to only known fields for backward compatibility
