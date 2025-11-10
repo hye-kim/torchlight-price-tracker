@@ -863,13 +863,8 @@ class TrackerApp(QMainWindow):
     def export_drops_to_excel(self) -> None:
         """Export drops to an Excel file sorted by item category."""
         try:
-            # Get the appropriate drop list based on current view
-            if self.show_all:
-                stats = self.statistics_tracker.get_total_stats()
-                export_type = "All Drops"
-            else:
-                stats = self.statistics_tracker.get_current_map_stats()
-                export_type = "Current Map Drops"
+            stats = self.statistics_tracker.get_total_stats()
+            export_type = "All Drops"
 
             if not stats['drops']:
                 QMessageBox.information(
