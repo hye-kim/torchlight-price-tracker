@@ -156,7 +156,7 @@ class TrackerApp(QMainWindow):
     def _setup_window(self) -> None:
         """Setup the main window properties."""
         self.setWindowTitle(APP_TITLE)
-        self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.Window)
+        self.setWindowFlags(Qt.Window)
 
         # Make window resizable with minimum size constraints
         central_widget = QWidget()
@@ -568,7 +568,7 @@ class TrackerApp(QMainWindow):
         """Create the drops detail dialog."""
         self.drops_dialog = QDialog(self)
         self.drops_dialog.setWindowTitle("Drops Detail - FurTorch")
-        self.drops_dialog.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.Tool)
+        self.drops_dialog.setWindowFlags(Qt.Tool)
         self.drops_dialog.setModal(False)
 
         layout = QVBoxLayout(self.drops_dialog)
@@ -624,7 +624,7 @@ class TrackerApp(QMainWindow):
         """Create the settings dialog."""
         self.settings_dialog = QDialog(self)
         self.settings_dialog.setWindowTitle("Settings - FurTorch")
-        self.settings_dialog.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.Tool)
+        self.settings_dialog.setWindowFlags(Qt.Tool)
         self.settings_dialog.setModal(False)
 
         layout = QVBoxLayout(self.settings_dialog)
