@@ -14,7 +14,6 @@ block_cipher = None
 datas = [
     ('config.json', '.'),
     ('en_id_table.json', '.'),
-    ('translation_mapping.json', '.'),
 ]
 
 # Hidden imports that PyInstaller might miss
