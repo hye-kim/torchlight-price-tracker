@@ -19,10 +19,12 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QObject
 from PyQt5.QtGui import QCloseEvent
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment
+from openpyxl.utils import get_column_letter
 
 from src.constants import (
     APP_TITLE,
-    EXCEL_CATEGORY_COLOR,
     EXCEL_COLUMN_PADDING,
     EXCEL_HEADER_COLOR,
     EXCEL_MAX_COLUMN_WIDTH,
@@ -1140,19 +1142,6 @@ class TrackerApp(QMainWindow):
 
     def export_drops_to_excel(self) -> None:
         """Export drops to an Excel file sorted by item category."""
-        try:
-            from openpyxl import Workbook
-            from openpyxl.styles import Font, PatternFill, Alignment
-            from openpyxl.utils import get_column_letter
-        except ImportError:
-            QMessageBox.warning(
-                self,
-                "Missing Dependency",
-                "The openpyxl library is not installed.\n\n"
-                "Please install it using: pip install openpyxl"
-            )
-            return
-
         try:
             # Get the appropriate drop list based on current view
             if self.show_all:
