@@ -3,7 +3,7 @@
     "tax": 1,
     "user": "4daa2fc5-9df9-4dc3-a90d-0575339833cc",
     "api_enabled": true,
-    "api_url": "https://torchlight-price-tracker-api.onrender.com",
+    "api_url": "https://torchlight-price-tracker.onrender.com",
     "api_timeout": 60,
     "use_local_fallback": true
 }
