@@ -30,6 +30,7 @@ from src.constants import (
     FILTER_OTHERS,
     ITEM_TYPES,
     LOG_POLL_INTERVAL,
+    LOG_FILE_REOPEN_INTERVAL,
     STATUS_FRESH,
     STATUS_OLD,
     STATUS_STALE,
