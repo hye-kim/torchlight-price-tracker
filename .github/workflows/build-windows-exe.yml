@@ -32,6 +32,24 @@ jobs:
         pip install -r requirements.txt
         pip install pyinstaller
 
+    - name: Clean previous build artifacts
+      run: |
+        if (Test-Path "build") { Remove-Item -Recurse -Force "build" }
+        if (Test-Path "dist") { Remove-Item -Recurse -Force "dist" }
+        Write-Host "Build artifacts cleaned"
+      shell: pwsh
+
+    - name: Verify config.json exists
+      run: |
+        if (Test-Path "config.json") {
+          Write-Host "config.json found - will be bundled in executable"
+          Get-Content "config.json"
+        } else {
+          Write-Host "ERROR: config.json not found!"
+          exit 1
+        }
+      shell: pwsh
+
     - name: Build executable with PyInstaller
       run: |
         pyinstaller torchlight_tracker.spec --clean
