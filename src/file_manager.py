@@ -12,7 +12,6 @@ from typing import Any, Dict, Optional
 
 from .api_client import APIClient
 from .constants import (
-    API_UPDATE_THROTTLE,
     CONFIG_FILE,
     DROP_LOG_FILE,
     EN_ID_TABLE_FILE,
@@ -219,7 +218,7 @@ class FileManager:
         """
         Update a single item in the table.
         Uses API if enabled for efficient updates, otherwise updates local file.
-        Only makes PUT requests to the API if the last update was over 1 hour ago.
+        Only makes PUT requests to the API if local data is newer than API data.
 
         Args:
             item_id: The item ID to update.
@@ -234,18 +233,18 @@ class FileManager:
                 # Get current item data to check timestamp
                 current_item = self.api_client.get_item(item_id)
 
-                # Check if enough time has passed since last update
+                # Compare local timestamp with API timestamp
                 should_update_api = True
                 if current_item:
-                    last_update = current_item.get('last_update', 0)
-                    current_time = time.time()
-                    time_since_update = current_time - last_update
+                    api_last_update = current_item.get('last_update', 0)
+                    local_last_update = updates.get('last_update', 0)
 
-                    if time_since_update < API_UPDATE_THROTTLE:
-                        logger.debug(f"Skipping API update for item {item_id}: last updated {time_since_update:.0f}s ago")
+                    # Only send PUT if local data is newer than API data
+                    if local_last_update <= api_last_update:
+                        logger.debug(f"Skipping API update for item {item_id}: API is already up-to-date (API: {api_last_update}, Local: {local_last_update})")
                         should_update_api = False
 
-                # Only make PUT request if enough time has passed or no timestamp found
+                # Only make PUT request if local data is newer or item doesn't exist in API
                 if should_update_api:
                     updated = self.api_client.update_item(item_id, updates)
                     if updated:
