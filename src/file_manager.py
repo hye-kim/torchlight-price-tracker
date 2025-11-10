@@ -176,36 +176,23 @@ class FileManager:
 
     def save_full_table(self, data: Dict[str, Any]) -> bool:
         """
-        Save the full item table and update cache.
-        If API is enabled, syncs data to API. Always saves to local file as backup.
+        Save the full item table to local file and update cache.
+        Does NOT sync to API - use update_item() for API updates.
 
         Args:
             data: Full item table to save.
 
         Returns:
-            True if successful (API or local), False otherwise.
+            True if successful, False otherwise.
         """
-        api_success = False
-        local_success = False
+        # Save to local file
+        success = self.save_json(FULL_TABLE_FILE, data)
 
-        # Try to sync to API if enabled
-        if self.api_client:
-            try:
-                # Sync all items to API
-                synced = self.api_client.sync_local_to_api(data)
-                api_success = synced > 0
-                logger.info(f"Synced {synced} items to API")
-            except Exception as e:
-                logger.error(f"Error syncing to API: {e}")
-
-        # Always save to local file as backup
-        local_success = self.save_json(FULL_TABLE_FILE, data)
-
-        # Update cache if either succeeded
-        if api_success or local_success:
+        # Update cache if successful
+        if success:
             self._full_table_cache = data
 
-        return api_success or local_success
+        return success
 
     def invalidate_cache(self) -> None:
         """Invalidate the cached full table data."""
@@ -277,17 +264,31 @@ class FileManager:
     def initialize_full_table_from_en_table(self) -> bool:
         """
         Initialize full_table.json from en_id_table.json if it doesn't exist.
+        Only used as fallback when API is not available.
 
         Returns:
             True if initialization was performed, False otherwise.
         """
-        full_table_path = Path(get_resource_path(FULL_TABLE_FILE))
-        en_table_path = Path(get_resource_path(EN_ID_TABLE_FILE))
+        full_table_path = Path(get_writable_path(FULL_TABLE_FILE))
 
         if full_table_path.exists():
             logger.debug("full_table.json already exists")
             return False
 
+        # If API is enabled, load from API instead
+        if self.api_client:
+            try:
+                logger.info("Loading initial data from API...")
+                api_data = self.api_client.get_all_items(use_cache=False)
+                if api_data:
+                    self.save_full_table(api_data)
+                    logger.info(f"Created {FULL_TABLE_FILE} from API ({len(api_data)} items)")
+                    return True
+            except Exception as e:
+                logger.warning(f"Could not load from API: {e}, falling back to en_id_table.json")
+
+        # Fallback: create from en_id_table.json
+        en_table_path = Path(get_resource_path(EN_ID_TABLE_FILE))
         if not en_table_path.exists():
             logger.warning(f"{EN_ID_TABLE_FILE} not found, cannot initialize full_table")
             return False
@@ -303,11 +304,12 @@ class FileManager:
                 full_table[item_id] = {
                     "name": item_data.get("name", f"Unknown_{item_id}"),
                     "type": item_data.get("type", "Unknown"),
-                    "price": 0
+                    "price": 0,
+                    "last_update": 0
                 }
 
             if self.save_full_table(full_table):
-                logger.info(f"Created {FULL_TABLE_FILE} from {EN_ID_TABLE_FILE}")
+                logger.info(f"Created {FULL_TABLE_FILE} from {EN_ID_TABLE_FILE} ({len(full_table)} items)")
                 return True
             return False
 
