@@ -20,6 +20,10 @@ class AppConfig:
     opacity: float = 1.0
     tax: int = 0
     user: str = ""
+    window_x: Optional[int] = None
+    window_y: Optional[int] = None
+    window_width: Optional[int] = None
+    window_height: Optional[int] = None
 
     def __post_init__(self):
         """Validate configuration values after initialization."""
@@ -85,7 +89,7 @@ class ConfigManager:
                 config_dict = json.load(f)
 
             # Filter to only known fields for backward compatibility
-            known_fields = {'opacity', 'tax', 'user'}
+            known_fields = {'opacity', 'tax', 'user', 'window_x', 'window_y', 'window_width', 'window_height'}
             filtered_config = {k: v for k, v in config_dict.items() if k in known_fields}
 
             self._config = AppConfig(**filtered_config)
@@ -163,3 +167,21 @@ class ConfigManager:
             True if tax is enabled, False otherwise.
         """
         return self.get().tax == 1
+
+    def update_window_geometry(self, x: int, y: int, width: int, height: int) -> None:
+        """
+        Update window geometry settings.
+
+        Args:
+            x: Window x position.
+            y: Window y position.
+            width: Window width.
+            height: Window height.
+        """
+        config = self.get()
+        config.window_x = x
+        config.window_y = y
+        config.window_width = width
+        config.window_height = height
+        self.save()
+        logger.debug(f"Window geometry updated: {x},{y} {width}x{height}")
