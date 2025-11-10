@@ -12,6 +12,7 @@ from typing import Any, Dict, Optional
 
 from .api_client import APIClient
 from .constants import (
+    API_UPDATE_THROTTLE,
     CONFIG_FILE,
     DROP_LOG_FILE,
     EN_ID_TABLE_FILE,
@@ -218,7 +219,7 @@ class FileManager:
         """
         Update a single item in the table.
         Uses API if enabled for efficient updates, otherwise updates local file.
-        Only makes PUT requests to the API if local data is newer than API data.
+        Only makes PUT requests to the API if local data is newer AND API data is stale (>1 hour old).
 
         Args:
             item_id: The item ID to update.
@@ -233,18 +234,25 @@ class FileManager:
                 # Get current item data to check timestamp
                 current_item = self.api_client.get_item(item_id)
 
-                # Compare local timestamp with API timestamp
+                # Compare local timestamp with API timestamp and check staleness
                 should_update_api = True
                 if current_item:
                     api_last_update = current_item.get('last_update', 0)
                     local_last_update = updates.get('last_update', 0)
+                    current_time = time.time()
+                    time_since_api_update = current_time - api_last_update
 
-                    # Only send PUT if local data is newer than API data
+                    # Only send PUT if BOTH conditions are met:
+                    # 1. Local data is newer than API data
+                    # 2. API data is stale (older than 1 hour)
                     if local_last_update <= api_last_update:
-                        logger.debug(f"Skipping API update for item {item_id}: API is already up-to-date (API: {api_last_update}, Local: {local_last_update})")
+                        logger.debug(f"Skipping API update for item {item_id}: Local data is not newer (API: {api_last_update}, Local: {local_last_update})")
+                        should_update_api = False
+                    elif time_since_api_update < API_UPDATE_THROTTLE:
+                        logger.debug(f"Skipping API update for item {item_id}: API was updated recently ({time_since_api_update:.0f}s ago)")
                         should_update_api = False
 
-                # Only make PUT request if local data is newer or item doesn't exist in API
+                # Only make PUT request if local data is newer AND API data is stale, or item doesn't exist in API
                 if should_update_api:
                     updated = self.api_client.update_item(item_id, updates)
                     if updated:
