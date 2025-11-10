@@ -28,7 +28,7 @@ class APIClient:
         Initialize the API client.
 
         Args:
-            base_url: Base URL of the API (e.g., "https://torchlight-price-tracker-api.onrender.com")
+            base_url: Base URL of the API (e.g., "https://torchlight-price-tracker.onrender.com")
             timeout: Request timeout in seconds
             max_retries: Maximum number of retry attempts for failed requests
         """
