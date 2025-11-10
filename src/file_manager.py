@@ -6,20 +6,21 @@ Handles reading and writing JSON files with proper error handling.
 import json
 import logging
 import time
-from pathlib import Path
-from typing import Dict, Any, Optional
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, Optional
 
+from .api_client import APIClient
 from .constants import (
+    API_UPDATE_THROTTLE,
+    CONFIG_FILE,
+    DROP_LOG_FILE,
+    EN_ID_TABLE_FILE,
     FULL_TABLE_FILE,
     TRANSLATION_MAPPING_FILE,
-    EN_ID_TABLE_FILE,
-    DROP_LOG_FILE,
-    CONFIG_FILE,
     get_resource_path,
-    get_writable_path
+    get_writable_path,
 )
-from .api_client import APIClient
 
 logger = logging.getLogger(__name__)
 
@@ -233,15 +234,15 @@ class FileManager:
                 # Get current item data to check timestamp
                 current_item = self.api_client.get_item(item_id)
 
-                # Check if enough time has passed since last update (1 hour = 3600 seconds)
+                # Check if enough time has passed since last update
                 should_update_api = True
                 if current_item:
                     last_update = current_item.get('last_update', 0)
                     current_time = time.time()
                     time_since_update = current_time - last_update
 
-                    if time_since_update < 3600:
-                        logger.info(f"Skipping API update for item {item_id}: last updated {time_since_update:.0f} seconds ago (< 1 hour)")
+                    if time_since_update < API_UPDATE_THROTTLE:
+                        logger.debug(f"Skipping API update for item {item_id}: last updated {time_since_update:.0f}s ago")
                         should_update_api = False
 
                 # Only make PUT request if enough time has passed or no timestamp found

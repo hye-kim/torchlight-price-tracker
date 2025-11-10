@@ -174,9 +174,39 @@ MIN_BAG_ITEMS_LEGACY = 10
 # Threading Configuration
 LOG_POLL_INTERVAL = 1.0  # seconds
 
+# API Configuration
+API_CACHE_TTL = 60  # seconds - How long to cache API responses
+API_RETRY_BASE_DELAY = 2  # seconds - Base delay for exponential backoff
+API_UPDATE_THROTTLE = 3600  # seconds - Minimum time between API updates for same item (1 hour)
+API_RATE_LIMIT_CALLS = 100  # Maximum API calls per window
+API_RATE_LIMIT_WINDOW = 60  # seconds - Rate limit window duration
+
+# File Handle Configuration
+LOG_FILE_REOPEN_INTERVAL = 30.0  # seconds - How often to check if log file needs reopening
+
+# UI Configuration - Additional
+UI_LISTBOX_ITEM_HEIGHT = 20  # pixels - Approximate height per list item
+
 # Default Configuration
 DEFAULT_CONFIG = {
     "opacity": 1.0,
     "tax": 0,
     "user": ""
 }
+
+
+def calculate_price_with_tax(price: float, item_id: str, tax_enabled: bool) -> float:
+    """
+    Calculate item price with tax applied if enabled.
+
+    Args:
+        price: Base item price
+        item_id: Item ID (some items are excluded from tax)
+        tax_enabled: Whether tax calculation is enabled
+
+    Returns:
+        Price with tax applied if applicable
+    """
+    if tax_enabled and item_id != EXCLUDED_ITEM_ID:
+        return price * TAX_RATE
+    return price
