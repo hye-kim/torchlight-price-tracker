@@ -1393,7 +1393,6 @@ def main():
 
     # Initialize data files
     file_manager.ensure_file_exists("config.json", {"opacity": 1.0, "tax": 0, "user": ""})
-    file_manager.ensure_file_exists("translation_mapping.json", {})
     file_manager.initialize_full_table_from_en_table()
 
     # Initialize core components

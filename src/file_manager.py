@@ -17,7 +17,6 @@ from .constants import (
     DROP_LOG_FILE,
     EN_ID_TABLE_FILE,
     FULL_TABLE_FILE,
-    TRANSLATION_MAPPING_FILE,
     get_resource_path,
     get_writable_path,
 )
@@ -218,8 +217,12 @@ class FileManager:
     def update_item(self, item_id: str, updates: Dict[str, Any]) -> bool:
         """
         Update a single item in the table.
-        Uses API if enabled for efficient updates, otherwise updates local file.
-        Only makes PUT requests to the API if local data is newer AND API data is stale (>1 hour old).
+        Only updates if local data is stale (>1 hour old).
+
+        Logic:
+        - Check last_update timestamp in local full_table.json
+        - If > 1 hour old: Send PUT to API and update local file
+        - If < 1 hour old: Skip update entirely (data is fresh enough)
 
         Args:
             item_id: The item ID to update.
@@ -228,87 +231,48 @@ class FileManager:
         Returns:
             True if successful, False otherwise.
         """
-        # If API is enabled, use API for efficient update
-        if self.api_client:
-            try:
-                # Get current item data to check timestamp
-                current_item = self.api_client.get_item(item_id)
+        # Load current local data
+        full_table = self.load_full_table(use_cache=True)
 
-                # Compare local timestamp with API timestamp and check staleness
-                should_update_api = True
-                if current_item:
-                    api_last_update = current_item.get('last_update', 0)
-                    local_last_update = updates.get('last_update', 0)
-                    current_time = time.time()
-                    time_since_api_update = current_time - api_last_update
-
-                    # Only send PUT if BOTH conditions are met:
-                    # 1. Local data is newer than API data
-                    # 2. API data is stale (older than 1 hour)
-                    if local_last_update <= api_last_update:
-                        logger.debug(f"Skipping API update for item {item_id}: Local data is not newer (API: {api_last_update}, Local: {local_last_update})")
-                        should_update_api = False
-                    elif time_since_api_update < API_UPDATE_THROTTLE:
-                        logger.debug(f"Skipping API update for item {item_id}: API was updated recently ({time_since_api_update:.0f}s ago)")
-                        should_update_api = False
-
-                # Only make PUT request if local data is newer AND API data is stale, or item doesn't exist in API
-                if should_update_api:
-                    updated = self.api_client.update_item(item_id, updates)
-                    if updated:
-                        # Also update local cache
-                        if self._full_table_cache and item_id in self._full_table_cache:
-                            self._full_table_cache[item_id].update(updates)
-                        # Also update local file as backup
-                        full_table = self.load_json(FULL_TABLE_FILE, {})
-                        if item_id in full_table:
-                            full_table[item_id].update(updates)
-                            self.save_json(FULL_TABLE_FILE, full_table)
-                        logger.debug(f"Updated item {item_id} via API")
-                        return True
-                    else:
-                        logger.warning(f"Failed to update item {item_id} via API")
-                else:
-                    # Still update local cache and file even if skipping API update
-                    if self._full_table_cache and item_id in self._full_table_cache:
-                        self._full_table_cache[item_id].update(updates)
-                    full_table = self.load_json(FULL_TABLE_FILE, {})
-                    if item_id in full_table:
-                        full_table[item_id].update(updates)
-                        self.save_json(FULL_TABLE_FILE, full_table)
-                    return True
-            except Exception as e:
-                logger.error(f"Error updating item via API: {e}")
-
-        # Fall back to local file update
-        full_table = self.load_full_table(use_cache=False)
-        if item_id in full_table:
-            full_table[item_id].update(updates)
-            return self.save_full_table(full_table)
-        else:
+        if item_id not in full_table:
             logger.warning(f"Item {item_id} not found in table")
             return False
 
-    def load_translation_mapping(self) -> Dict[str, str]:
-        """
-        Load translation mapping between Chinese and English item names.
+        # Check if local data is stale (>1 hour old)
+        current_item = full_table[item_id]
+        local_last_update = current_item.get('last_update', 0)
+        current_time = time.time()
+        time_since_update = current_time - local_last_update
 
-        Returns:
-            Translation mapping dictionary.
-        """
-        return self.load_json(TRANSLATION_MAPPING_FILE, {})
+        # If data is fresh (< 1 hour old), skip update entirely
+        if time_since_update < API_UPDATE_THROTTLE:
+            logger.debug(f"Skipping update for item {item_id}: local data is fresh ({time_since_update:.0f}s old)")
+            return True  # Not an error, just skipping
 
-    def save_translation_mapping(self, mapping: Dict[str, str]) -> bool:
-        """
-        Save translation mapping to file.
+        # Data is stale (> 1 hour old), proceed with update
+        logger.info(f"Updating item {item_id}: local data is stale ({time_since_update:.0f}s old)")
 
-        Args:
-            mapping: Translation mapping dictionary.
+        # If API is enabled, send PUT request
+        if self.api_client:
+            try:
+                updated = self.api_client.update_item(item_id, updates)
+                if updated:
+                    logger.info(f"Updated item {item_id} via API")
+                else:
+                    logger.warning(f"Failed to update item {item_id} via API, updating locally only")
+            except Exception as e:
+                logger.error(f"Error updating item via API: {e}, updating locally only")
 
-        Returns:
-            True if successful, False otherwise.
-        """
-        return self.save_json(TRANSLATION_MAPPING_FILE, mapping)
+        # Update local file and cache
+        full_table[item_id].update(updates)
+
+        # Update cache
+        if self._full_table_cache and item_id in self._full_table_cache:
+            self._full_table_cache[item_id].update(updates)
+
+        # Save to file
+        return self.save_json(FULL_TABLE_FILE, full_table)
+
 
     def initialize_full_table_from_en_table(self) -> bool:
         """

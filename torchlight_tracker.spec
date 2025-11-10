@@ -9,11 +9,11 @@ from PyInstaller.utils.hooks import collect_data_files, collect_submodules
 block_cipher = None
 
 # Collect all data files needed by the application
+# Note: full_table.json is NOT bundled - it will be created on first run from API or en_id_table.json
+# This ensures users always get fresh price data instead of outdated bundled prices
 datas = [
     ('config.json', '.'),
     ('en_id_table.json', '.'),
-    ('full_table.json', '.'),
-    ('translation_mapping.json', '.'),
 ]
 
 # Hidden imports that PyInstaller might miss

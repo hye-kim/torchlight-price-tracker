@@ -71,7 +71,6 @@ APP_TITLE = f"{APP_NAME} v{APP_VERSION}"
 
 # File Paths
 CONFIG_FILE = "config.json"
-TRANSLATION_MAPPING_FILE = "translation_mapping.json"
 FULL_TABLE_FILE = "full_table.json"
 EN_ID_TABLE_FILE = "en_id_table.json"
 DROP_LOG_FILE = "drop.txt"
