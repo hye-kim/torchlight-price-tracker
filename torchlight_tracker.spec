@@ -11,6 +11,8 @@ block_cipher = None
 # Collect all data files needed by the application
 # Note: full_table.json is NOT bundled - it will be created on first run from API or en_id_table.json
 # This ensures users always get fresh price data instead of outdated bundled prices
+# IMPORTANT: config.json is bundled at build time. Always clean build artifacts before
+# rebuilding to ensure the latest config.json is included (build script does this automatically)
 datas = [
     ('config.json', '.'),
     ('en_id_table.json', '.'),

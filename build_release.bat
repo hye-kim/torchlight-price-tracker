@@ -33,6 +33,17 @@ if errorlevel 1 (
 )
 
 echo.
+echo Cleaning previous build artifacts...
+if exist build (
+    echo Removing build directory...
+    rmdir /s /q build
+)
+if exist dist (
+    echo Removing dist directory...
+    rmdir /s /q dist
+)
+
+echo.
 echo Building executable...
 pyinstaller torchlight_tracker.spec --clean
 if errorlevel 1 (
