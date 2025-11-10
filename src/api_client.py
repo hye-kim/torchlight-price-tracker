@@ -97,26 +97,38 @@ class APIClient:
         url = f"{self.base_url}{endpoint}"
         kwargs.setdefault('timeout', self.timeout)
 
+        last_exception = None
         for attempt in range(self.max_retries):
             try:
                 response = self.session.request(method, url, **kwargs)
                 response.raise_for_status()
                 return response
             except requests.exceptions.HTTPError as e:
+                last_exception = e
                 logger.warning(f"HTTP error on attempt {attempt + 1}/{self.max_retries}: {e}")
-                if response.status_code == 404:
-                    # Don't retry on 404
-                    return None
-                if attempt == self.max_retries - 1:
-                    logger.error(f"Failed to {method} {url} after {self.max_retries} attempts")
-                    return None
+                # Don't retry on client errors (4xx) except timeout-related ones
+                if hasattr(e, 'response') and e.response is not None:
+                    status_code = e.response.status_code
+                    if 400 <= status_code < 500 and status_code not in (408, 429):
+                        logger.error(f"Client error {status_code} for {method} {url}, not retrying")
+                        return None
+            except requests.exceptions.Timeout as e:
+                last_exception = e
+                logger.warning(f"Timeout on attempt {attempt + 1}/{self.max_retries}: {e}")
+            except requests.exceptions.ConnectionError as e:
+                last_exception = e
+                logger.warning(f"Connection error on attempt {attempt + 1}/{self.max_retries}: {e}")
             except requests.exceptions.RequestException as e:
+                last_exception = e
                 logger.warning(f"Request error on attempt {attempt + 1}/{self.max_retries}: {e}")
-                if attempt == self.max_retries - 1:
-                    logger.error(f"Failed to {method} {url} after {self.max_retries} attempts")
-                    return None
-                # Exponential backoff using constant
-                time.sleep(API_RETRY_BASE_DELAY ** attempt)
+
+            # If this was the last attempt, log final error
+            if attempt == self.max_retries - 1:
+                logger.error(f"Failed to {method} {url} after {self.max_retries} attempts. Last error: {last_exception}")
+                return None
+
+            # Exponential backoff
+            time.sleep(API_RETRY_BASE_DELAY ** attempt)
 
         return None
 
@@ -136,7 +148,7 @@ class APIClient:
             logger.error(f"API health check failed: {e}")
         return False
 
-    def get_all_items(self, item_type: Optional[str] = None, use_cache: bool = True) -> Optional[Dict[str, Dict]]:
+    def get_all_items(self, item_type: Optional[str] = None, use_cache: bool = True) -> Optional[Dict[str, Any]]:
         """
         Get all items from the API.
 
@@ -178,7 +190,7 @@ class APIClient:
                 logger.error(f"Failed to parse JSON response: {e}")
         return None
 
-    def get_item(self, item_id: str) -> Optional[Dict]:
+    def get_item(self, item_id: str) -> Optional[Dict[str, Any]]:
         """
         Get a specific item by ID.
 
@@ -207,7 +219,7 @@ class APIClient:
                 logger.error(f"Failed to parse JSON response: {e}")
         return None
 
-    def create_item(self, item_id: str, item_data: Dict) -> Optional[Dict]:
+    def create_item(self, item_id: str, item_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """
         Create a new item.
 
@@ -231,7 +243,7 @@ class APIClient:
                 logger.error(f"Failed to parse JSON response: {e}")
         return None
 
-    def update_item(self, item_id: str, updates: Dict) -> Optional[Dict]:
+    def update_item(self, item_id: str, updates: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """
         Update an existing item.
 
@@ -285,7 +297,7 @@ class APIClient:
                 logger.error(f"Failed to parse JSON response: {e}")
         return None
 
-    def get_stats(self) -> Optional[Dict]:
+    def get_stats(self) -> Optional[Dict[str, Any]]:
         """
         Get API statistics.
 

@@ -100,19 +100,24 @@ class FileManager:
         Returns:
             Loaded JSON data or default value.
         """
+        resolved_path = get_resource_path(filepath)
+        default_value = default if default is not None else {}
+
         try:
-            resolved_path = get_resource_path(filepath)
             with open(resolved_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except FileNotFoundError:
             logger.warning(f"File not found: {filepath}")
-            return default if default is not None else {}
+            return default_value
         except json.JSONDecodeError as e:
-            logger.error(f"Invalid JSON in {filepath}: {e}")
-            return default if default is not None else {}
-        except IOError as e:
-            logger.error(f"Error reading {filepath}: {e}")
-            return default if default is not None else {}
+            logger.error(f"Invalid JSON in {filepath}: {e}", exc_info=True)
+            return default_value
+        except (IOError, OSError) as e:
+            logger.error(f"Error reading {filepath}: {e}", exc_info=True)
+            return default_value
+        except Exception as e:
+            logger.error(f"Unexpected error loading {filepath}: {e}", exc_info=True)
+            return default_value
 
     def save_json(self, filepath: str, data: Any) -> bool:
         """
@@ -126,13 +131,19 @@ class FileManager:
         Returns:
             True if successful, False otherwise.
         """
+        writable_path = get_writable_path(filepath)
         try:
-            writable_path = get_writable_path(filepath)
             with open(writable_path, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=4, ensure_ascii=False)
             return True
-        except IOError as e:
-            logger.error(f"Error writing to {writable_path}: {e}")
+        except (IOError, OSError) as e:
+            logger.error(f"Error writing to {writable_path}: {e}", exc_info=True)
+            return False
+        except (TypeError, ValueError) as e:
+            logger.error(f"Error serializing data for {writable_path}: {e}", exc_info=True)
+            return False
+        except Exception as e:
+            logger.error(f"Unexpected error saving {writable_path}: {e}", exc_info=True)
             return False
 
     def load_full_table(self, use_cache: bool = True) -> Dict[str, Any]:

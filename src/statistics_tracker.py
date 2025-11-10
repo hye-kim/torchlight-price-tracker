@@ -6,7 +6,7 @@ Manages drop statistics, income calculations, and map tracking.
 import logging
 import time
 from threading import Lock
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from .config_manager import ConfigManager
 from .constants import calculate_price_with_tax
@@ -110,7 +110,7 @@ class StatisticsTracker:
         self,
         item_id: str,
         amount: int,
-        full_table: Dict[str, any]
+        full_table: Dict[str, Any]
     ) -> Optional[Tuple[str, str, int, float]]:
         """
         Process a single item change.
@@ -187,7 +187,7 @@ class StatisticsTracker:
 
         self.file_manager.append_to_drop_log(message)
 
-    def get_current_map_stats(self) -> Dict[str, any]:
+    def get_current_map_stats(self) -> Dict[str, Any]:
         """
         Get statistics for the current map.
 
@@ -207,7 +207,7 @@ class StatisticsTracker:
                 "income_per_minute": (self.income / (duration / 60)) if duration > 0 else 0
             }
 
-    def get_total_stats(self) -> Dict[str, any]:
+    def get_total_stats(self) -> Dict[str, Any]:
         """
         Get total statistics across all maps.
 
@@ -230,6 +230,8 @@ class StatisticsTracker:
     def get_formatted_time(self, seconds: float) -> str:
         """
         Format seconds as "Xm Ys" string.
+
+        Deprecated: Use format_duration from constants module instead.
 
         Args:
             seconds: Time in seconds.
