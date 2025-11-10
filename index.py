@@ -1129,7 +1129,24 @@ class TrackerApp(QMainWindow):
             # Write metadata
             ws.append([f"Torchlight Infinite Drops Export - {export_type}"])
             ws.append([f"Export Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"])
-            ws.append([f"Total Income: {round(stats['income'], 2)}"])
+
+            # Calculate time elapsed
+            duration = stats['duration']
+            hours = int(duration // 3600)
+            minutes = int((duration % 3600) // 60)
+            seconds = int(duration % 60)
+            time_str = f"{hours}h {minutes}m {seconds}s" if hours > 0 else f"{minutes}m {seconds}s"
+            ws.append([f"Time Elapsed: {time_str}"])
+
+            # Add map count for total stats
+            if 'map_count' in stats:
+                ws.append([f"Map Count: {stats['map_count']}"])
+
+            # Calculate and add FE/hour
+            fe_per_hour = (stats['income'] / (duration / 3600)) if duration > 0 else 0
+            ws.append([f"FE/Hour: {round(fe_per_hour, 2)}"])
+
+            ws.append([f"Total Income: {round(stats['income'], 2)} FE"])
             ws.append([])  # Empty row
 
             # Write headers
@@ -1175,12 +1192,19 @@ class TrackerApp(QMainWindow):
             # Save the workbook
             wb.save(file_path)
 
+            # Build success message with all stats
+            success_msg = f"Drops have been exported to:\n{file_path}\n\n"
+            success_msg += f"Total items: {len(drop_data)}\n"
+            success_msg += f"Time elapsed: {time_str}\n"
+            if 'map_count' in stats:
+                success_msg += f"Map count: {stats['map_count']}\n"
+            success_msg += f"Total FE: {round(stats['income'], 2)}\n"
+            success_msg += f"FE/Hour: {round(fe_per_hour, 2)}"
+
             QMessageBox.information(
                 self,
                 "Export Successful",
-                f"Drops have been exported to:\n{file_path}\n\n"
-                f"Total items: {len(drop_data)}\n"
-                f"Total value: {round(stats['income'], 2)}"
+                success_msg
             )
             logger.info(f"Drops exported to: {file_path}")
 
