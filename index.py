@@ -7,8 +7,7 @@ type hints, logging, and thread safety.
 
 import logging
 import time
-import threading
-from typing import Any, Dict, List, Optional
+from typing import Optional
 import sys
 from datetime import datetime
 
@@ -17,36 +16,25 @@ from PyQt5.QtWidgets import (
     QLabel, QPushButton, QListWidget, QComboBox, QMessageBox, QDialog, QFrame,
     QFileDialog, QSystemTrayIcon, QMenu, QAction
 )
-from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QObject
+from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QCloseEvent
-from openpyxl import Workbook
-from openpyxl.styles import Font, PatternFill, Alignment
-from openpyxl.utils import get_column_letter
 
 from src.constants import (
     APP_TITLE,
-    EXCEL_COLUMN_PADDING,
-    EXCEL_HEADER_COLOR,
-    EXCEL_MAX_COLUMN_WIDTH,
     FILTER_ASHES,
     FILTER_COMPASS,
     FILTER_CURRENCY,
     FILTER_GLOW,
     FILTER_OTHERS,
     ITEM_TYPES,
-    LOG_FILE_REOPEN_INTERVAL,
-    LOG_POLL_INTERVAL,
     UI_COLORS,
     UI_DEFAULT_WINDOW_HEIGHT,
     UI_DEFAULT_WINDOW_WIDTH,
     UI_LISTBOX_HEIGHT,
     UI_MIN_WINDOW_HEIGHT,
     UI_MIN_WINDOW_WIDTH,
-    calculate_fe_per_hour,
     calculate_price_with_tax,
-    format_duration,
     get_price_freshness_indicator,
-    get_price_freshness_status,
 )
 from src.config_manager import ConfigManager
 from src.file_manager import FileManager
@@ -54,6 +42,9 @@ from src.log_parser import LogParser
 from src.inventory_tracker import InventoryTracker
 from src.statistics_tracker import StatisticsTracker
 from src.game_detector import GameDetector
+from src.ui.excel_exporter import ExcelExporter
+from src.ui.styles import get_stylesheet
+from src.monitoring.log_monitor import LogMonitorThread, WorkerSignals
 
 # Setup logging with UTF-8 encoding to handle Unicode characters
 # Note: When running as a GUI application (console=False), sys.stdout may be None
@@ -81,13 +72,6 @@ for handler in logging.root.handlers:
             pass
 
 logger = logging.getLogger(__name__)
-
-
-class WorkerSignals(QObject):
-    """Signals for worker thread communication."""
-    initialization_complete = pyqtSignal(int)
-    update_display = pyqtSignal()
-    reshow_drops = pyqtSignal()
 
 
 class TrackerApp(QMainWindow):
@@ -118,6 +102,7 @@ class TrackerApp(QMainWindow):
         self.inventory_tracker = inventory_tracker
         self.statistics_tracker = statistics_tracker
         self.log_file_path = log_file_path
+        self.excel_exporter = ExcelExporter(file_manager, config_manager)
 
         self.app_running = True
         self.show_all = False
@@ -159,144 +144,7 @@ class TrackerApp(QMainWindow):
 
     def _apply_stylesheet(self) -> None:
         """Apply Qt Style Sheet for modern dark theme."""
-        stylesheet = f"""
-            QMainWindow {{
-                background-color: {self.colors['bg_primary']};
-            }}
-
-            QWidget {{
-                background-color: {self.colors['bg_primary']};
-                color: {self.colors['text_primary']};
-                font-family: 'Segoe UI';
-                font-size: 11pt;
-            }}
-
-            QFrame.card {{
-                background-color: {self.colors['bg_tertiary']};
-                border-radius: 8px;
-                padding: 15px;
-            }}
-
-            QLabel {{
-                color: {self.colors['text_primary']};
-                background-color: transparent;
-            }}
-
-            QLabel.header {{
-                font-size: 13pt;
-                font-weight: bold;
-                color: {self.colors['text_primary']};
-                padding: 5px;
-            }}
-
-            QLabel.status {{
-                font-size: 9pt;
-                color: {self.colors['text_secondary']};
-            }}
-
-            QPushButton {{
-                background-color: {self.colors['accent']};
-                color: {self.colors['text_primary']};
-                border: none;
-                border-radius: 6px;
-                padding: 8px 15px;
-                font-weight: bold;
-                font-size: 10pt;
-            }}
-
-            QPushButton:hover {{
-                background-color: {self.colors['accent_hover']};
-            }}
-
-            QPushButton:pressed {{
-                background-color: {self.colors['accent']};
-            }}
-
-            QPushButton.secondary {{
-                background-color: {self.colors['bg_secondary']};
-                color: {self.colors['text_primary']};
-                padding: 6px 12px;
-                font-size: 9pt;
-                font-weight: normal;
-            }}
-
-            QPushButton.secondary:hover {{
-                background-color: {self.colors['bg_tertiary']};
-            }}
-
-            QPushButton.filter-active {{
-                background-color: {self.colors['accent']};
-                color: {self.colors['text_primary']};
-                padding: 6px 12px;
-                font-size: 9pt;
-                font-weight: bold;
-            }}
-
-            QPushButton.filter-active:hover {{
-                background-color: {self.colors['accent_hover']};
-            }}
-
-            QPushButton.danger {{
-                background-color: {self.colors['error']};
-                color: {self.colors['text_primary']};
-            }}
-
-            QPushButton.danger:hover {{
-                background-color: #dc2626;
-            }}
-
-            QPushButton:disabled {{
-                background-color: {self.colors['bg_secondary']};
-                color: {self.colors['text_secondary']};
-            }}
-
-            QListWidget {{
-                background-color: {self.colors['bg_secondary']};
-                color: {self.colors['text_primary']};
-                border: none;
-                border-radius: 6px;
-                padding: 5px;
-                font-size: 10pt;
-            }}
-
-            QListWidget::item {{
-                padding: 5px;
-            }}
-
-            QListWidget::item:selected {{
-                background-color: {self.colors['accent']};
-                color: {self.colors['text_primary']};
-            }}
-
-            QComboBox {{
-                background-color: {self.colors['bg_secondary']};
-                color: {self.colors['text_primary']};
-                border: 1px solid {self.colors['border']};
-                border-radius: 4px;
-                padding: 5px 10px;
-                min-width: 150px;
-            }}
-
-            QComboBox:hover {{
-                border-color: {self.colors['accent']};
-            }}
-
-            QComboBox::drop-down {{
-                border: none;
-                width: 20px;
-            }}
-
-            QComboBox QAbstractItemView {{
-                background-color: {self.colors['bg_secondary']};
-                color: {self.colors['text_primary']};
-                selection-background-color: {self.colors['accent']};
-                border: 1px solid {self.colors['border']};
-            }}
-
-            QDialog {{
-                background-color: {self.colors['bg_primary']};
-            }}
-        """
+        stylesheet = get_stylesheet(self.colors)
         self.setStyleSheet(stylesheet)
 
     def _create_widgets(self) -> None:
@@ -1012,134 +860,6 @@ class TrackerApp(QMainWindow):
                 geometry.width(), geometry.height()
             )
 
-    def _prepare_export_data(self, stats: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """
-        Prepare drop data for Excel export.
-
-        Args:
-            stats: Statistics dictionary containing drops
-
-        Returns:
-            List of drop data dictionaries sorted by category and value
-        """
-        drops = stats['drops']
-        full_table = self.file_manager.load_full_table()
-        drop_data = []
-
-        for item_id, count in drops.items():
-            if item_id not in full_table:
-                continue
-
-            item_data = full_table[item_id]
-            item_name = item_data.get("name", item_id)
-            item_type = item_data.get("type", "Unknown")
-            base_price = item_data.get("price", 0)
-
-            # Apply tax if enabled using centralized function
-            item_price = calculate_price_with_tax(base_price, item_id, self.config_manager.is_tax_enabled())
-            total_value = round(count * item_price, 2)
-
-            # Determine freshness status using helper
-            now = time.time()
-            last_update = item_data.get("last_update", 0)
-            status = get_price_freshness_status(last_update, now)
-
-            drop_data.append({
-                'category': item_type,
-                'name': item_name,
-                'count': count,
-                'unit_price': round(item_price, 2),
-                'total_value': total_value,
-                'status': status
-            })
-
-        # Sort by category, then by total value descending
-        drop_data.sort(key=lambda x: (ITEM_TYPES.index(x['category']) if x['category'] in ITEM_TYPES else 999, -x['total_value']))
-        return drop_data
-
-    def _write_excel_metadata(self, ws, export_type: str, stats: Dict[str, Any]) -> None:
-        """
-        Write metadata rows to Excel worksheet.
-
-        Args:
-            ws: Worksheet to write to
-            export_type: Type of export (e.g., "All Drops" or "Current Map Drops")
-            stats: Statistics dictionary
-        """
-        ws.append([f"Torchlight Infinite Drops Export - {export_type}"])
-        ws.append([f"Export Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"])
-
-        # Format and add time elapsed using helper
-        duration = stats['duration']
-        time_str = format_duration(duration)
-        ws.append([f"Time Elapsed: {time_str}"])
-
-        # Add map count for total stats
-        if 'map_count' in stats:
-            ws.append([f"Map Count: {stats['map_count']}"])
-
-        # Calculate and add FE/hour using helper
-        fe_per_hour = calculate_fe_per_hour(stats['income'], duration)
-        ws.append([f"FE/Hour: {round(fe_per_hour, 2)}"])
-        ws.append([f"Total Income: {round(stats['income'], 2)} FE"])
-        ws.append([])  # Empty row
-
-    def _write_excel_data(self, ws, drop_data: List[Dict[str, Any]], header_font, header_fill) -> None:
-        """
-        Write drop data to Excel worksheet.
-
-        Args:
-            ws: Worksheet to write to
-            drop_data: List of drop data dictionaries
-            header_font: Font for header row
-            header_fill: Fill for header row
-        """
-        # Write headers
-        headers = ["Category", "Item Name", "Quantity", "Unit Price", "Total Value", "Price Status"]
-        ws.append(headers)
-
-        header_row = ws[ws.max_row]
-        for cell in header_row:
-            cell.font = header_font
-            cell.fill = header_fill
-            cell.alignment = Alignment(horizontal="center", vertical="center")
-
-        # Write data
-        current_category = None
-        for item in drop_data:
-            # Add category separator
-            if item['category'] != current_category:
-                current_category = item['category']
-                ws.append([])  # Empty row before new category
-
-            ws.append([
-                item['category'],
-                item['name'],
-                item['count'],
-                item['unit_price'],
-                item['total_value'],
-                item['status']
-            ])
-
-    def _auto_adjust_column_widths(self, ws) -> None:
-        """
-        Auto-adjust column widths based on content.
-
-        Args:
-            ws: Worksheet to adjust
-        """
-        for col_idx, column in enumerate(ws.columns, start=1):
-            max_length = 0
-            for cell in column:
-                try:
-                    if len(str(cell.value)) > max_length:
-                        max_length = len(str(cell.value))
-                except (AttributeError, TypeError):
-                    pass
-            adjusted_width = min(max_length + EXCEL_COLUMN_PADDING, EXCEL_MAX_COLUMN_WIDTH)
-            column_letter = get_column_letter(col_idx)
-            ws.column_dimensions[column_letter].width = adjusted_width
-
     def export_drops_to_excel(self) -> None:
         """Export drops to an Excel file sorted by item category."""
         try:
@@ -1159,9 +879,6 @@ class TrackerApp(QMainWindow):
                 )
                 return
 
-            # Prepare data using helper method
-            drop_data = self._prepare_export_data(stats)
-
             # Prompt user for save location
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             default_filename = f"torchlight_drops_{timestamp}.xlsx"
@@ -1176,38 +893,17 @@ class TrackerApp(QMainWindow):
             if not file_path:
                 return  # User cancelled
 
-            # Create Excel workbook
-            wb = Workbook()
-            ws = wb.active
-            if ws is None:
-                # This should never happen with a new workbook, but handle it for type safety
-                ws = wb.create_sheet("Drops Export")
-            ws.title = "Drops Export"
+            # Export using ExcelExporter
+            result = self.excel_exporter.export_to_file(file_path, stats, export_type)
 
-            # Define styles
-            header_font = Font(bold=True, size=12, color="FFFFFF")
-            header_fill = PatternFill(start_color=EXCEL_HEADER_COLOR, end_color=EXCEL_HEADER_COLOR, fill_type="solid")
-
-            # Write metadata, data, and adjust formatting using helper methods
-            self._write_excel_metadata(ws, export_type, stats)
-            self._write_excel_data(ws, drop_data, header_font, header_fill)
-            self._auto_adjust_column_widths(ws)
-
-            # Save the workbook
-            wb.save(file_path)
-
-            # Build success message with all stats
-            duration = stats['duration']
-            time_str = format_duration(duration)
-            fe_per_hour = calculate_fe_per_hour(stats['income'], duration)
-
-            success_msg = f"Drops have been exported to:\n{file_path}\n\n"
-            success_msg += f"Total items: {len(drop_data)}\n"
-            success_msg += f"Time elapsed: {time_str}\n"
-            if 'map_count' in stats:
-                success_msg += f"Map count: {stats['map_count']}\n"
-            success_msg += f"Total FE: {round(stats['income'], 2)}\n"
-            success_msg += f"FE/Hour: {round(fe_per_hour, 2)}"
+            # Build success message
+            success_msg = f"Drops have been exported to:\n{result['file_path']}\n\n"
+            success_msg += f"Total items: {result['total_items']}\n"
+            success_msg += f"Time elapsed: {result['time_str']}\n"
+            if result['map_count'] is not None:
+                success_msg += f"Map count: {result['map_count']}\n"
+            success_msg += f"Total FE: {result['total_fe']}\n"
+            success_msg += f"FE/Hour: {result['fe_per_hour']}"
 
             QMessageBox.information(
                 self,
@@ -1223,169 +919,6 @@ class TrackerApp(QMainWindow):
                 "Export Error",
                 f"An error occurred while exporting:\n{str(e)}"
             )
-
-
-class LogMonitorThread(threading.Thread):
-    """Thread for monitoring the game log file."""
-
-    def __init__(
-        self,
-        app: TrackerApp,
-        log_file_path: Optional[str],
-        log_parser: LogParser,
-        inventory_tracker: InventoryTracker,
-        statistics_tracker: StatisticsTracker,
-        signals: WorkerSignals
-    ):
-        """
-        Initialize the log monitor thread.
-
-        Args:
-            app: Main application instance.
-            log_file_path: Path to the game log file.
-            log_parser: Log parser instance.
-            inventory_tracker: Inventory tracker instance.
-            statistics_tracker: Statistics tracker instance.
-            signals: Worker signals for thread-safe UI updates.
-        """
-        super().__init__(daemon=True)
-        self.app = app
-        self.log_file_path = log_file_path
-        self.log_parser = log_parser
-        self.inventory_tracker = inventory_tracker
-        self.statistics_tracker = statistics_tracker
-        self.signals = signals
-        self.log_file = None
-        self.last_reopen_check = time.time()
-
-    def _open_log_file(self) -> bool:
-        """
-        Open the log file and seek to end.
-
-        Returns:
-            True if successful, False otherwise.
-        """
-        if not self.log_file_path:
-            return False
-
-        try:
-            self.log_file = open(self.log_file_path, "r", encoding="utf-8")
-            self.log_file.seek(0, 2)  # Seek to end
-            logger.info("Log file opened successfully")
-            return True
-        except (IOError, OSError) as e:
-            logger.error(f"Could not open log file: {e}")
-            self.log_file = None
-            return False
-
-    def _close_log_file(self) -> None:
-        """Close the log file if open."""
-        if self.log_file:
-            try:
-                self.log_file.close()
-                logger.info("Log file closed")
-            except (IOError, OSError) as e:
-                logger.error(f"Error closing log file: {e}")
-            finally:
-                self.log_file = None
-
-    def _check_and_reopen_log_file(self) -> None:
-        """Check if log file needs reopening (e.g., was deleted or rotated)."""
-        now = time.time()
-        if now - self.last_reopen_check < LOG_FILE_REOPEN_INTERVAL:
-            return
-
-        self.last_reopen_check = now
-
-        # Check if file still exists and is accessible
-        if self.log_file_path:
-            import os
-            if not os.path.exists(self.log_file_path):
-                logger.warning("Log file no longer exists, attempting to reopen")
-                self._close_log_file()
-                self._open_log_file()
-
-    def run(self) -> None:
-        """Run the log monitoring loop."""
-        if not self.log_file_path:
-            logger.warning("No log file path provided")
-            return
-
-        # Open log file initially
-        self._open_log_file()
-
-        try:
-            while self.app.app_running:
-                try:
-                    # Sleep in smaller chunks to be more responsive to shutdown
-                    for _ in range(int(LOG_POLL_INTERVAL * 10)):
-                        if not self.app.app_running:
-                            break
-                        time.sleep(0.1)
-
-                    if not self.app.app_running:
-                        break
-
-                    # Check if log file needs reopening
-                    self._check_and_reopen_log_file()
-
-                    # Read and process log file
-                    if self.log_file:
-                        try:
-                            text = self.log_file.read()
-                            if text:
-                                self._process_log_text(text)
-                        except (IOError, OSError) as e:
-                            logger.error(f"Error reading log file: {e}")
-                            # Try to reopen the file
-                            self._close_log_file()
-                            self._open_log_file()
-
-                    # Update display via signal
-                    self.signals.update_display.emit()
-
-                except Exception as e:
-                    logger.error(f"Error in log monitor thread: {e}", exc_info=True)
-
-        finally:
-            # Ensure log file is closed on exit
-            self._close_log_file()
-
-    def _process_log_text(self, text: str) -> None:
-        """
-        Process new log text.
-
-        Args:
-            text: New log text to process.
-        """
-        # Update prices
-        self.log_parser.update_prices_in_table(text)
-
-        # Check for initialization completion
-        if self.inventory_tracker.awaiting_initialization:
-            success, item_count = self.inventory_tracker.process_initialization(text)
-            if success:
-                self.signals.initialization_complete.emit(item_count)
-
-        # Detect map changes
-        entering_map, exiting_map = self.log_parser.detect_map_change(text)
-
-        if entering_map:
-            self.statistics_tracker.enter_map()
-            self.inventory_tracker.reset_map_baseline()
-
-        if exiting_map:
-            self.statistics_tracker.exit_map()
-
-        # Detect item changes
-        changes = self.inventory_tracker.scan_for_changes(text)
-        if changes:
-            self.statistics_tracker.process_item_changes(changes)
-            self.signals.reshow_drops.emit()
-
-            # If not in map but got changes, assume we're in a map
-            if not self.statistics_tracker.is_in_map:
-                self.statistics_tracker.is_in_map = True
 
 
 def main():
@@ -1436,12 +969,12 @@ def main():
 
     # Start log monitoring thread
     monitor = LogMonitorThread(
-        tracker_app,
         log_file_path,
         log_parser,
         inventory_tracker,
         statistics_tracker,
-        tracker_app.signals
+        tracker_app.signals,
+        lambda: tracker_app.app_running
     )
     monitor.start()
 
