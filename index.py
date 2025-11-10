@@ -15,9 +15,10 @@ from datetime import datetime
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
     QLabel, QPushButton, QListWidget, QComboBox, QMessageBox, QDialog, QFrame,
-    QFileDialog
+    QFileDialog, QSystemTrayIcon, QMenu, QAction
 )
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QObject
+from PyQt5.QtGui import QIcon, QCloseEvent
 
 from src.constants import (
     APP_TITLE,
@@ -29,6 +30,7 @@ from src.constants import (
     FILTER_OTHERS,
     ITEM_TYPES,
     LOG_POLL_INTERVAL,
+    LOG_FILE_REOPEN_INTERVAL,
     STATUS_FRESH,
     STATUS_OLD,
     STATUS_STALE,
@@ -145,14 +147,22 @@ class TrackerApp(QMainWindow):
         self._create_drops_window()
         self._create_settings_window()
 
+        # Create system tray icon
+        self._create_tray_icon()
+
+        # Load saved window geometry
+        self._load_window_geometry()
+
     def _setup_window(self) -> None:
         """Setup the main window properties."""
         self.setWindowTitle(APP_TITLE)
-        self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.Tool)
+        self.setWindowFlags(Qt.Window)
 
-        # Set fixed size (non-resizable)
+        # Make window resizable with minimum size constraints
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
+        self.setMinimumSize(400, 600)
+        self.resize(500, 800)  # Default size
 
     def _apply_stylesheet(self) -> None:
         """Apply Qt Style Sheet for modern dark theme."""
@@ -325,6 +335,21 @@ class TrackerApp(QMainWindow):
         layout.setContentsMargins(15, 15, 15, 15)
         layout.setSpacing(10)
 
+        # Map count at the top
+        map_count_label = QLabel("MAP COUNT")
+        map_count_label.setProperty("class", "status")
+        layout.addWidget(map_count_label)
+
+        self.label_map_count = QLabel("🎫 0 maps")
+        self.label_map_count.setProperty("class", "header")
+        layout.addWidget(self.label_map_count)
+
+        # Separator
+        separator1 = QFrame()
+        separator1.setFrameShape(QFrame.HLine)
+        separator1.setStyleSheet(f"background-color: {self.colors['border']}; max-height: 1px;")
+        layout.addWidget(separator1)
+
         # Current map stats
         current_label = QLabel("CURRENT MAP")
         current_label.setProperty("class", "status")
@@ -341,17 +366,17 @@ class TrackerApp(QMainWindow):
         self.label_current_speed.setProperty("class", "header")
         current_grid.addWidget(self.label_current_speed, 0, 1)
 
-        self.label_map_count = QLabel("🎫 0 maps")
-        self.label_map_count.setProperty("class", "header")
-        current_grid.addWidget(self.label_map_count, 0, 2)
+        self.label_current_map_fe = QLabel("🔥 0 FE")
+        self.label_current_map_fe.setProperty("class", "header")
+        current_grid.addWidget(self.label_current_map_fe, 0, 2)
 
         layout.addLayout(current_grid)
 
         # Separator
-        separator = QFrame()
-        separator.setFrameShape(QFrame.HLine)
-        separator.setStyleSheet(f"background-color: {self.colors['border']}; max-height: 1px;")
-        layout.addWidget(separator)
+        separator2 = QFrame()
+        separator2.setFrameShape(QFrame.HLine)
+        separator2.setStyleSheet(f"background-color: {self.colors['border']}; max-height: 1px;")
+        layout.addWidget(separator2)
 
         # Total stats
         total_label = QLabel("TOTAL SESSION")
@@ -369,9 +394,9 @@ class TrackerApp(QMainWindow):
         self.label_total_speed.setProperty("class", "header")
         total_grid.addWidget(self.label_total_speed, 0, 1)
 
-        self.label_current_earn = QLabel("🔥 0 total")
-        self.label_current_earn.setProperty("class", "header")
-        total_grid.addWidget(self.label_current_earn, 0, 2)
+        self.label_total_fe = QLabel("🔥 0 FE")
+        self.label_total_fe.setProperty("class", "header")
+        total_grid.addWidget(self.label_total_fe, 0, 2)
 
         layout.addLayout(total_grid)
 
@@ -543,7 +568,7 @@ class TrackerApp(QMainWindow):
         """Create the drops detail dialog."""
         self.drops_dialog = QDialog(self)
         self.drops_dialog.setWindowTitle("Drops Detail - FurTorch")
-        self.drops_dialog.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.Tool)
+        self.drops_dialog.setWindowFlags(Qt.Tool)
         self.drops_dialog.setModal(False)
 
         layout = QVBoxLayout(self.drops_dialog)
@@ -599,7 +624,7 @@ class TrackerApp(QMainWindow):
         """Create the settings dialog."""
         self.settings_dialog = QDialog(self)
         self.settings_dialog.setWindowTitle("Settings - FurTorch")
-        self.settings_dialog.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.Tool)
+        self.settings_dialog.setWindowFlags(Qt.Tool)
         self.settings_dialog.setModal(False)
 
         layout = QVBoxLayout(self.settings_dialog)
@@ -680,7 +705,7 @@ class TrackerApp(QMainWindow):
         self.label_initialize_status.setStyleSheet(f"color: {self.colors['success']};")
         self.button_initialize.setEnabled(True)
 
-    def closeEvent(self, event) -> None:
+    def closeEvent(self, event: QCloseEvent) -> None:
         """Handle window close event."""
         reply = QMessageBox.question(
             self,
@@ -693,6 +718,10 @@ class TrackerApp(QMainWindow):
         if reply == QMessageBox.Yes:
             # Signal the app to stop
             self.app_running = False
+
+            # Hide tray icon
+            if hasattr(self, 'tray_icon') and self.tray_icon:
+                self.tray_icon.hide()
 
             # Close child dialogs
             try:
@@ -727,7 +756,8 @@ class TrackerApp(QMainWindow):
             self.statistics_tracker.reset()
 
             # Update UI
-            self.label_current_earn.setText("🔥 0 total")
+            self.label_total_fe.setText("🔥 0 FE")
+            self.label_current_map_fe.setText("🔥 0 FE")
             self.label_map_count.setText("🎫 0 maps")
             self.inner_panel_drop_listbox.clear()
 
@@ -824,17 +854,19 @@ class TrackerApp(QMainWindow):
         # Get appropriate drop list
         if self.show_all:
             stats = self.statistics_tracker.get_total_stats()
-            self.label_current_earn.setText(f"🔥 {round(stats['income'], 2)} total")
         else:
             stats = self.statistics_tracker.get_current_map_stats()
-            self.label_current_earn.setText(f"🔥 {round(stats['income'], 2)} total")
+
+        # Update labels
+        current_map_stats = self.statistics_tracker.get_current_map_stats()
+        self.label_current_map_fe.setText(f"🔥 {round(current_map_stats['income'], 2)} FE")
 
         total_stats = self.statistics_tracker.get_total_stats()
+        self.label_total_fe.setText(f"🔥 {round(total_stats['income'], 2)} FE")
         self.label_map_count.setText(f"🎫 {total_stats['map_count']} maps")
 
-        # Update drop listbox
-        self.inner_panel_drop_listbox.clear()
-
+        # Prepare drop items with their values for sorting
+        drop_items = []
         for item_id, count in stats['drops'].items():
             if item_id not in full_table:
                 continue
@@ -863,9 +895,15 @@ class TrackerApp(QMainWindow):
             item_price = calculate_price_with_tax(base_price, item_id, self.config_manager.is_tax_enabled())
 
             total_value = round(count * item_price, 2)
-            self.inner_panel_drop_listbox.addItem(
-                f"{status} {item_name} x{count} [{total_value}]"
-            )
+            drop_items.append((total_value, f"{status} {item_name} x{count} [{total_value}]"))
+
+        # Sort by total value (descending - highest first)
+        drop_items.sort(key=lambda x: x[0], reverse=True)
+
+        # Update drop listbox
+        self.inner_panel_drop_listbox.clear()
+        for _, item_text in drop_items:
+            self.inner_panel_drop_listbox.addItem(item_text)
 
     def update_display(self) -> None:
         """Update the time and income displays."""
@@ -880,6 +918,9 @@ class TrackerApp(QMainWindow):
             income_per_min = current_stats['income_per_minute']
             self.label_current_speed.setText(f"🔥 {round(income_per_min, 2)} /min")
 
+            # Update current map FE
+            self.label_current_map_fe.setText(f"🔥 {round(current_stats['income'], 2)} FE")
+
         total_stats = self.statistics_tracker.get_total_stats()
         duration = total_stats['duration']
         m = int(duration // 60)
@@ -888,6 +929,102 @@ class TrackerApp(QMainWindow):
 
         income_per_min = total_stats['income_per_minute']
         self.label_total_speed.setText(f"🔥 {round(income_per_min, 2)} /min")
+
+        # Update total session FE
+        self.label_total_fe.setText(f"🔥 {round(total_stats['income'], 2)} FE")
+
+        # Update map count
+        self.label_map_count.setText(f"🎫 {total_stats['map_count']} maps")
+
+    def _create_tray_icon(self) -> None:
+        """Create the system tray icon."""
+        # Create tray icon (using default application icon for now)
+        self.tray_icon = QSystemTrayIcon(self)
+        self.tray_icon.setIcon(self.style().standardIcon(self.style().SP_ComputerIcon))
+
+        # Create tray menu
+        tray_menu = QMenu()
+
+        show_action = QAction("Show", self)
+        show_action.triggered.connect(self.show_from_tray)
+        tray_menu.addAction(show_action)
+
+        hide_action = QAction("Hide", self)
+        hide_action.triggered.connect(self.hide)
+        tray_menu.addAction(hide_action)
+
+        tray_menu.addSeparator()
+
+        quit_action = QAction("Quit", self)
+        quit_action.triggered.connect(self.quit_application)
+        tray_menu.addAction(quit_action)
+
+        self.tray_icon.setContextMenu(tray_menu)
+        self.tray_icon.activated.connect(self.on_tray_icon_activated)
+        self.tray_icon.show()
+
+        logger.info("System tray icon created")
+
+    def show_from_tray(self) -> None:
+        """Show window from tray."""
+        self.show()
+        self.activateWindow()
+        self.raise_()
+
+    def on_tray_icon_activated(self, reason: QSystemTrayIcon.ActivationReason) -> None:
+        """Handle tray icon activation."""
+        if reason == QSystemTrayIcon.DoubleClick:
+            self.show_from_tray()
+
+    def quit_application(self) -> None:
+        """Quit the application."""
+        self.app_running = False
+        QApplication.quit()
+
+    def changeEvent(self, event) -> None:
+        """Handle window state changes."""
+        if event.type() == event.WindowStateChange:
+            if self.isMinimized():
+                # Minimize to tray
+                QTimer.singleShot(0, self.hide)
+                self.tray_icon.showMessage(
+                    "Torchlight Price Tracker",
+                    "Application minimized to tray",
+                    QSystemTrayIcon.Information,
+                    2000
+                )
+        super().changeEvent(event)
+
+    def moveEvent(self, event) -> None:
+        """Handle window move event."""
+        super().moveEvent(event)
+        # Save window geometry after move
+        self._save_window_geometry()
+
+    def resizeEvent(self, event) -> None:
+        """Handle window resize event."""
+        super().resizeEvent(event)
+        # Save window geometry after resize
+        self._save_window_geometry()
+
+    def _load_window_geometry(self) -> None:
+        """Load saved window geometry from config."""
+        config = self.config_manager.get()
+        if config.window_x is not None and config.window_y is not None:
+            if config.window_width is not None and config.window_height is not None:
+                self.setGeometry(config.window_x, config.window_y,
+                                config.window_width, config.window_height)
+                logger.info(f"Loaded window geometry: {config.window_x},{config.window_y} "
+                           f"{config.window_width}x{config.window_height}")
+
+    def _save_window_geometry(self) -> None:
+        """Save window geometry to config."""
+        if not self.isMaximized() and not self.isMinimized():
+            geometry = self.geometry()
+            self.config_manager.update_window_geometry(
+                geometry.x(), geometry.y(),
+                geometry.width(), geometry.height()
+            )
 
     def export_drops_to_excel(self) -> None:
         """Export drops to an Excel file sorted by item category."""
@@ -992,7 +1129,24 @@ class TrackerApp(QMainWindow):
             # Write metadata
             ws.append([f"Torchlight Infinite Drops Export - {export_type}"])
             ws.append([f"Export Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"])
-            ws.append([f"Total Income: {round(stats['income'], 2)}"])
+
+            # Calculate time elapsed
+            duration = stats['duration']
+            hours = int(duration // 3600)
+            minutes = int((duration % 3600) // 60)
+            seconds = int(duration % 60)
+            time_str = f"{hours}h {minutes}m {seconds}s" if hours > 0 else f"{minutes}m {seconds}s"
+            ws.append([f"Time Elapsed: {time_str}"])
+
+            # Add map count for total stats
+            if 'map_count' in stats:
+                ws.append([f"Map Count: {stats['map_count']}"])
+
+            # Calculate and add FE/hour
+            fe_per_hour = (stats['income'] / (duration / 3600)) if duration > 0 else 0
+            ws.append([f"FE/Hour: {round(fe_per_hour, 2)}"])
+
+            ws.append([f"Total Income: {round(stats['income'], 2)} FE"])
             ws.append([])  # Empty row
 
             # Write headers
@@ -1038,12 +1192,19 @@ class TrackerApp(QMainWindow):
             # Save the workbook
             wb.save(file_path)
 
+            # Build success message with all stats
+            success_msg = f"Drops have been exported to:\n{file_path}\n\n"
+            success_msg += f"Total items: {len(drop_data)}\n"
+            success_msg += f"Time elapsed: {time_str}\n"
+            if 'map_count' in stats:
+                success_msg += f"Map count: {stats['map_count']}\n"
+            success_msg += f"Total FE: {round(stats['income'], 2)}\n"
+            success_msg += f"FE/Hour: {round(fe_per_hour, 2)}"
+
             QMessageBox.information(
                 self,
                 "Export Successful",
-                f"Drops have been exported to:\n{file_path}\n\n"
-                f"Total items: {len(drop_data)}\n"
-                f"Total value: {round(stats['income'], 2)}"
+                success_msg
             )
             logger.info(f"Drops exported to: {file_path}")
 
