@@ -5,15 +5,21 @@ Handles finding the game process and log file.
 
 import logging
 import os
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Any
+
+# Import Windows-specific modules with proper fallbacks
+WINDOWS_MODULES_AVAILABLE = False
+win32gui: Any = None
+win32process: Any = None
+psutil: Any = None
 
 try:
-    import win32gui
-    import win32process
-    import psutil
+    import win32gui  # type: ignore
+    import win32process  # type: ignore
+    import psutil  # type: ignore
     WINDOWS_MODULES_AVAILABLE = True
 except ImportError:
-    WINDOWS_MODULES_AVAILABLE = False
+    pass
 
 logger = logging.getLogger(__name__)
 
@@ -41,13 +47,49 @@ class GameDetector:
 
         def enum_windows_callback(hwnd, _):
             nonlocal found_hwnd
-            if win32gui.IsWindowVisible(hwnd):
+            try:
+                # Extra safety check for modules
+                if not WINDOWS_MODULES_AVAILABLE:
+                    return True
+
+                if not win32gui.IsWindowVisible(hwnd):
+                    return True  # Continue enumeration
+
                 window_title = win32gui.GetWindowText(hwnd)
-                # Search for "Torchlight: Infinite" (case-insensitive, ignoring trailing spaces)
-                if "torchlight: infinite" in window_title.lower():
-                    logger.info(f"Found game window with title: '{window_title}'")
-                    found_hwnd = hwnd
-                    return False  # Stop enumeration
+                window_title_lower = window_title.lower()
+
+                # Search for "Torchlight: Infinite" in window title
+                if "torchlight: infinite" in window_title_lower:
+                    # Exclude false positives (Discord, browsers, etc.)
+                    excluded_keywords = ["discord", "chrome", "firefox", "edge", "browser", "twitch", "youtube"]
+                    if any(keyword in window_title_lower for keyword in excluded_keywords):
+                        logger.debug(f"Skipping excluded window: '{window_title}'")
+                        return True  # Continue enumeration
+
+                    # Verify the process executable name to ensure it's the actual game
+                    try:
+                        _, pid = win32process.GetWindowThreadProcessId(hwnd)
+                        process = psutil.Process(pid)
+                        exe_name = os.path.basename(process.exe()).lower()
+
+                        # The game executable should be something like "TorchLight.exe" or similar
+                        # Accept if it contains "torchlight" or "tl" in the exe name
+                        if "torchlight" in exe_name or exe_name.startswith("tl"):
+                            logger.info(f"Found game window with title: '{window_title}' (process: {exe_name})")
+                            found_hwnd = hwnd
+                            return False  # Stop enumeration
+                        else:
+                            logger.debug(f"Window title matches but process doesn't: '{window_title}' (process: {exe_name})")
+                    except Exception as e:
+                        # Process may have terminated or we don't have permission to access it
+                        # Using broad Exception to catch psutil errors, OSError, and any Windows API errors
+                        logger.debug(f"Cannot access process for window '{window_title}': {e}")
+                        return True  # Continue enumeration
+
+            except Exception as e:
+                # Catch any other errors in the callback to prevent breaking EnumWindows
+                logger.debug(f"Error in window enumeration callback for hwnd {hwnd}: {e}")
+
             return True  # Continue enumeration
 
         try:
@@ -78,11 +120,12 @@ class GameDetector:
 
             tid, pid = win32process.GetWindowThreadProcessId(hwnd)
             process = psutil.Process(pid)
-            self.game_exe_path = process.exe()
+            exe_path = process.exe()
+            self.game_exe_path = exe_path
 
             # Calculate log file path relative to game executable
             # Note: We concatenate directly to exe path (not dirname) to get correct relative navigation
-            log_path = self.game_exe_path + "/../../../TorchLight/Saved/Logs/UE_game.log"
+            log_path = exe_path + "/../../../TorchLight/Saved/Logs/UE_game.log"
             log_path = log_path.replace("\\", "/")
 
             # Verify log file exists and is readable
