@@ -175,7 +175,7 @@ MIN_BAG_ITEMS_LEGACY = 10
 LOG_POLL_INTERVAL = 1.0  # seconds
 
 # API Configuration
-API_CACHE_TTL = 60  # seconds - How long to cache API responses
+API_CACHE_TTL = 3600  # seconds - How long to cache API responses (matches API_UPDATE_THROTTLE)
 API_RETRY_BASE_DELAY = 2  # seconds - Base delay for exponential backoff
 API_UPDATE_THROTTLE = 3600  # seconds - Minimum time between API updates for same item (1 hour)
 API_RATE_LIMIT_CALLS = 100  # Maximum API calls per window
