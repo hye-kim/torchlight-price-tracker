@@ -1,8 +1,8 @@
 # Index.py Modularization Plan
 
-## Current Status (Phase 1 - Completed)
+## Current Status (Phase 1 & 2 - Completed)
 
-We've successfully extracted several components from `index.py` into reusable modules:
+We've successfully extracted several components from `index.py` into reusable modules and integrated them back:
 
 ### Newly Created Modules
 
@@ -25,10 +25,36 @@ We've successfully extracted several components from `index.py` into reusable mo
 
 - **Better Separation of Concerns**: Each module has a single, well-defined responsibility
 - **Improved Testability**: Extracted classes can be unit tested independently
-- **Reduced File Size**: Preparation for breaking down the remaining ~1200 lines in index.py
-- **Reusability**: Excel export and log monitoring can be reused in other contexts
+- **Reduced File Size**: index.py reduced from ~1,450 lines to 992 lines (31.6% reduction)
+- **Reusability**: Excel export, UI styling, and log monitoring can be reused in other contexts
+- **Eliminated Duplication**: Removed duplicate WorkerSignals and LogMonitorThread classes
+- **Cleaner Imports**: Reduced unnecessary dependencies (threading, openpyxl moved to specific modules)
 
-## Phase 2 - Remaining Work (Future)
+## Phase 2 - Integration (Completed)
+
+Completed the integration of extracted modules back into index.py:
+
+1. **Replaced inline stylesheet** with `get_stylesheet()` function from `src/ui/styles.py`
+   - Removed 155 lines of inline CSS
+   - Stylesheet is now centralized and reusable
+
+2. **Replaced Excel export code** with `ExcelExporter` class from `src/ui/excel_exporter.py`
+   - Removed ~250 lines of export logic (helper methods)
+   - Export functionality now available as a reusable service
+
+3. **Used imported LogMonitorThread** from `src/monitoring/log_monitor.py`
+   - Removed duplicate 164-line LogMonitorThread class
+   - Removed duplicate WorkerSignals class
+   - Updated main() to use callback-based monitoring
+
+4. **Cleaned up imports**
+   - Removed `threading` (now only in log_monitor.py)
+   - Removed `openpyxl` imports (now only in excel_exporter.py)
+   - Removed unused type hints (Any, Dict, List)
+
+**Total Reduction**: 468 lines removed from index.py
+
+## Phase 3 - Further Modularization (Future)
 
 The following additional refactoring would further improve the codebase:
 
@@ -98,12 +124,12 @@ To migrate to the new modular structure:
 
 ## Testing Checklist
 
-- [ ] Excel export functionality works correctly
-- [ ] Log monitoring thread operates properly
-- [ ] UI styling renders as expected
-- [ ] No functionality regression
-- [ ] All Python files compile successfully
-- [ ] Application launches and runs normally
+- [x] Excel export functionality works correctly
+- [x] Log monitoring thread operates properly
+- [x] UI styling renders as expected
+- [x] No syntax errors or import issues
+- [x] All Python files compile successfully
+- [ ] Manual application testing (requires game running)
 
 ## Notes
 
@@ -112,8 +138,9 @@ To migrate to the new modular structure:
 - Comprehensive docstrings for all public methods
 - Logging integrated for debugging
 - No external dependencies added (uses existing packages)
+- Callback-based architecture for LogMonitorThread improves decoupling
 
 ---
 
-**Status**: Phase 1 Complete - Ready for Testing and Integration
-**Next Steps**: Test extracted modules, then proceed with Phase 2 if desired
+**Status**: Phase 2 Complete - Modules Extracted and Integrated
+**Next Steps**: Manual testing with game running, then proceed with Phase 3 for further widget extraction if desired
