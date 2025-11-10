@@ -3,23 +3,31 @@ Log parsing utilities for the Torchlight Infinite Price Tracker.
 Handles extraction of game events from log files.
 """
 
-import re
 import logging
+import re
 import time
-from typing import List, Tuple, Optional, Dict, Any
+from typing import Any, Dict, List, Optional, Tuple
 
 from .constants import (
-    PATTERN_PRICE_ID,
-    PATTERN_BAG_MODIFY,
+    EXCLUDED_ITEM_ID,
     PATTERN_BAG_INIT,
+    PATTERN_BAG_MODIFY,
     PATTERN_MAP_ENTER,
     PATTERN_MAP_EXIT,
+    PATTERN_PRICE_ID,
     PRICE_SAMPLE_SIZE,
-    EXCLUDED_ITEM_ID
 )
 from .file_manager import FileManager
 
 logger = logging.getLogger(__name__)
+
+# Pre-compile regex patterns for performance
+_REGEX_PRICE_ID = re.compile(PATTERN_PRICE_ID, re.DOTALL)
+_REGEX_BAG_MODIFY = re.compile(PATTERN_BAG_MODIFY)
+_REGEX_BAG_INIT = re.compile(PATTERN_BAG_INIT)
+_REGEX_MAP_ENTER = re.compile(PATTERN_MAP_ENTER)
+_REGEX_MAP_EXIT = re.compile(PATTERN_MAP_EXIT)
+_REGEX_VALUE_PATTERN = re.compile(r'\+\d+\s+\[([\d.]+)\]')
 
 
 class LogParser:
@@ -46,7 +54,7 @@ class LogParser:
         """
         price_updates = []
         try:
-            matches = re.findall(PATTERN_PRICE_ID, text, re.DOTALL)
+            matches = _REGEX_PRICE_ID.findall(text)
 
             for synid, item_id in matches:
                 if item_id == EXCLUDED_ITEM_ID:
@@ -57,7 +65,7 @@ class LogParser:
                     price_updates.append((item_id, price))
 
         except Exception as e:
-            logger.error(f"Error extracting price info: {e}")
+            logger.error(f"Error extracting price info: {e}", exc_info=True)
 
         return price_updates
 
@@ -88,9 +96,8 @@ class LogParser:
 
             data_block = match.group(1)
 
-            # Extract all +number [value] patterns
-            value_pattern = re.compile(r'\+\d+\s+\[([\d.]+)\]')
-            values = value_pattern.findall(data_block)
+            # Extract all +number [value] patterns using pre-compiled regex
+            values = _REGEX_VALUE_PATTERN.findall(data_block)
 
             if not values:
                 return -1.0
@@ -103,7 +110,7 @@ class LogParser:
             return round(average_value, 4)
 
         except Exception as e:
-            logger.error(f"Error extracting price for item {item_id}: {e}")
+            logger.error(f"Error extracting price for item {item_id}: {e}", exc_info=True)
             return None
 
     def update_prices_in_table(self, text: str) -> int:
@@ -171,7 +178,7 @@ class LogParser:
         Returns:
             List of (page_id, slot_id, config_base_id, count) tuples.
         """
-        matches = re.findall(PATTERN_BAG_MODIFY, text)
+        matches = _REGEX_BAG_MODIFY.findall(text)
         return [(page_id, slot_id, config_base_id, int(count))
                 for page_id, slot_id, config_base_id, count in matches]
 
@@ -185,7 +192,7 @@ class LogParser:
         Returns:
             List of (page_id, slot_id, config_base_id, count) tuples.
         """
-        matches = re.findall(PATTERN_BAG_INIT, text)
+        matches = _REGEX_BAG_INIT.findall(text)
         return [(page_id, slot_id, config_base_id, int(count))
                 for page_id, slot_id, config_base_id, count in matches]
 
@@ -199,8 +206,8 @@ class LogParser:
         Returns:
             Tuple of (entering_map, exiting_map) booleans.
         """
-        entering_map = bool(re.search(PATTERN_MAP_ENTER, text))
-        exiting_map = bool(re.search(PATTERN_MAP_EXIT, text))
+        entering_map = bool(_REGEX_MAP_ENTER.search(text))
+        exiting_map = bool(_REGEX_MAP_EXIT.search(text))
         return entering_map, exiting_map
 
     def detect_player_login(self, text: str) -> bool:

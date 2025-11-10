@@ -21,24 +21,25 @@ from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QObject
 
 from src.constants import (
     APP_TITLE,
-    ITEM_TYPES,
-    FILTER_CURRENCY,
+    EXCLUDED_ITEM_ID,
     FILTER_ASHES,
     FILTER_COMPASS,
+    FILTER_CURRENCY,
     FILTER_GLOW,
     FILTER_OTHERS,
+    ITEM_TYPES,
+    LOG_POLL_INTERVAL,
+    STATUS_FRESH,
+    STATUS_OLD,
+    STATUS_STALE,
+    TIME_FRESH_THRESHOLD,
+    TIME_STALE_THRESHOLD,
     UI_FONT_FAMILY,
     UI_FONT_SIZE_LARGE,
     UI_FONT_SIZE_MEDIUM,
     UI_LISTBOX_HEIGHT,
     UI_LISTBOX_WIDTH,
-    STATUS_FRESH,
-    STATUS_STALE,
-    STATUS_OLD,
-    TIME_FRESH_THRESHOLD,
-    TIME_STALE_THRESHOLD,
-    LOG_POLL_INTERVAL,
-    EXCLUDED_ITEM_ID
+    calculate_price_with_tax,
 )
 from src.config_manager import ConfigManager
 from src.file_manager import FileManager
@@ -531,10 +532,10 @@ class TrackerApp(QMainWindow):
         }
 
         # Drops list
-        self.inner_pannel_drop_listbox = QListWidget()
-        self.inner_pannel_drop_listbox.setMinimumHeight(UI_LISTBOX_HEIGHT * 20)  # Approximate height
-        self.inner_pannel_drop_listbox.addItem("Drops will be displayed here...")
-        layout.addWidget(self.inner_pannel_drop_listbox)
+        self.inner_panel_drop_listbox = QListWidget()
+        self.inner_panel_drop_listbox.setMinimumHeight(UI_LISTBOX_HEIGHT * 20)  # Approximate height
+        self.inner_panel_drop_listbox.addItem("Drops will be displayed here...")
+        layout.addWidget(self.inner_panel_drop_listbox)
 
         return card
 
@@ -696,13 +697,13 @@ class TrackerApp(QMainWindow):
             # Close child dialogs
             try:
                 self.drops_dialog.close()
-            except:
-                pass
+            except (AttributeError, RuntimeError) as e:
+                logger.debug(f"Error closing drops dialog: {e}")
 
             try:
                 self.settings_dialog.close()
-            except:
-                pass
+            except (AttributeError, RuntimeError) as e:
+                logger.debug(f"Error closing settings dialog: {e}")
 
             # Accept the event and quit the application
             event.accept()
@@ -728,7 +729,7 @@ class TrackerApp(QMainWindow):
             # Update UI
             self.label_current_earn.setText("🔥 0 total")
             self.label_map_count.setText("🎫 0 maps")
-            self.inner_pannel_drop_listbox.clear()
+            self.inner_panel_drop_listbox.clear()
 
             QMessageBox.information(
                 self,
@@ -832,7 +833,7 @@ class TrackerApp(QMainWindow):
         self.label_map_count.setText(f"🎫 {total_stats['map_count']} maps")
 
         # Update drop listbox
-        self.inner_pannel_drop_listbox.clear()
+        self.inner_panel_drop_listbox.clear()
 
         for item_id, count in stats['drops'].items():
             if item_id not in full_table:
@@ -857,13 +858,12 @@ class TrackerApp(QMainWindow):
             else:
                 status = STATUS_OLD
 
-            # Calculate price with tax if applicable
-            item_price = item_data.get("price", 0)
-            if self.config_manager.is_tax_enabled() and item_id != EXCLUDED_ITEM_ID:
-                item_price = item_price * 0.875
+            # Calculate price with tax if applicable using centralized function
+            base_price = item_data.get("price", 0)
+            item_price = calculate_price_with_tax(base_price, item_id, self.config_manager.is_tax_enabled())
 
             total_value = round(count * item_price, 2)
-            self.inner_pannel_drop_listbox.addItem(
+            self.inner_panel_drop_listbox.addItem(
                 f"{status} {item_name} x{count} [{total_value}]"
             )
 
@@ -933,11 +933,10 @@ class TrackerApp(QMainWindow):
                 item_data = full_table[item_id]
                 item_name = item_data.get("name", item_id)
                 item_type = item_data.get("type", "Unknown")
-                item_price = item_data.get("price", 0)
+                base_price = item_data.get("price", 0)
 
-                # Apply tax if enabled
-                if self.config_manager.is_tax_enabled() and item_id != EXCLUDED_ITEM_ID:
-                    item_price = item_price * 0.875
+                # Apply tax if enabled using centralized function
+                item_price = calculate_price_with_tax(base_price, item_id, self.config_manager.is_tax_enabled())
 
                 total_value = round(count * item_price, 2)
 
@@ -1088,45 +1087,100 @@ class LogMonitorThread(threading.Thread):
         self.statistics_tracker = statistics_tracker
         self.signals = signals
         self.log_file = None
+        self.last_reopen_check = time.time()
+
+    def _open_log_file(self) -> bool:
+        """
+        Open the log file and seek to end.
+
+        Returns:
+            True if successful, False otherwise.
+        """
+        if not self.log_file_path:
+            return False
+
+        try:
+            self.log_file = open(self.log_file_path, "r", encoding="utf-8")
+            self.log_file.seek(0, 2)  # Seek to end
+            logger.info("Log file opened successfully")
+            return True
+        except (IOError, OSError) as e:
+            logger.error(f"Could not open log file: {e}")
+            self.log_file = None
+            return False
+
+    def _close_log_file(self) -> None:
+        """Close the log file if open."""
+        if self.log_file:
+            try:
+                self.log_file.close()
+                logger.info("Log file closed")
+            except (IOError, OSError) as e:
+                logger.error(f"Error closing log file: {e}")
+            finally:
+                self.log_file = None
+
+    def _check_and_reopen_log_file(self) -> None:
+        """Check if log file needs reopening (e.g., was deleted or rotated)."""
+        now = time.time()
+        if now - self.last_reopen_check < LOG_FILE_REOPEN_INTERVAL:
+            return
+
+        self.last_reopen_check = now
+
+        # Check if file still exists and is accessible
+        if self.log_file_path:
+            import os
+            if not os.path.exists(self.log_file_path):
+                logger.warning("Log file no longer exists, attempting to reopen")
+                self._close_log_file()
+                self._open_log_file()
 
     def run(self) -> None:
         """Run the log monitoring loop."""
-        if self.log_file_path:
-            try:
-                self.log_file = open(self.log_file_path, "r", encoding="utf-8")
-                self.log_file.seek(0, 2)  # Seek to end
-                logger.info("Log file opened successfully")
-            except IOError as e:
-                logger.error(f"Could not open log file: {e}")
-                self.log_file = None
-        else:
+        if not self.log_file_path:
             logger.warning("No log file path provided")
+            return
 
-        while self.app.app_running:
-            try:
-                # Sleep in smaller chunks to be more responsive to shutdown
-                for _ in range(int(LOG_POLL_INTERVAL * 10)):
+        # Open log file initially
+        self._open_log_file()
+
+        try:
+            while self.app.app_running:
+                try:
+                    # Sleep in smaller chunks to be more responsive to shutdown
+                    for _ in range(int(LOG_POLL_INTERVAL * 10)):
+                        if not self.app.app_running:
+                            break
+                        time.sleep(0.1)
+
                     if not self.app.app_running:
                         break
-                    time.sleep(0.1)
 
-                if not self.app.app_running:
-                    break
+                    # Check if log file needs reopening
+                    self._check_and_reopen_log_file()
 
-                if self.log_file:
-                    text = self.log_file.read()
-                    if text:
-                        self._process_log_text(text)
+                    # Read and process log file
+                    if self.log_file:
+                        try:
+                            text = self.log_file.read()
+                            if text:
+                                self._process_log_text(text)
+                        except (IOError, OSError) as e:
+                            logger.error(f"Error reading log file: {e}")
+                            # Try to reopen the file
+                            self._close_log_file()
+                            self._open_log_file()
 
-                # Update display via signal
-                self.signals.update_display.emit()
+                    # Update display via signal
+                    self.signals.update_display.emit()
 
-            except Exception as e:
-                logger.error(f"Error in log monitor thread: {e}", exc_info=True)
+                except Exception as e:
+                    logger.error(f"Error in log monitor thread: {e}", exc_info=True)
 
-        if self.log_file:
-            self.log_file.close()
-            logger.info("Log file closed")
+        finally:
+            # Ensure log file is closed on exit
+            self._close_log_file()
 
     def _process_log_text(self, text: str) -> None:
         """

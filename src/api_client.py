@@ -2,11 +2,20 @@
 API client for Torchlight Price Tracker API.
 Handles all HTTP communication with the remote API.
 """
-import requests
 import logging
-from typing import Optional, Dict, Any
 import time
+from collections import deque
 from threading import Lock
+from typing import Any, Dict, Optional
+
+import requests
+
+from .constants import (
+    API_CACHE_TTL,
+    API_RATE_LIMIT_CALLS,
+    API_RATE_LIMIT_WINDOW,
+    API_RETRY_BASE_DELAY,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +39,38 @@ class APIClient:
         self._cache: Dict[str, Any] = {}
         self._cache_lock = Lock()
         self._cache_timestamp: Optional[float] = None
-        self._cache_ttl = 60  # Cache for 60 seconds
+        self._cache_ttl = API_CACHE_TTL
+
+        # Rate limiting
+        self._rate_limit_calls = API_RATE_LIMIT_CALLS
+        self._rate_limit_window = API_RATE_LIMIT_WINDOW
+        self._request_timestamps: deque = deque()
+        self._rate_limit_lock = Lock()
+
+    def _check_rate_limit(self) -> None:
+        """
+        Check and enforce rate limiting.
+        Blocks if rate limit would be exceeded, waiting until a request slot is available.
+        """
+        with self._rate_limit_lock:
+            now = time.time()
+
+            # Remove timestamps outside the current window
+            while self._request_timestamps and self._request_timestamps[0] < now - self._rate_limit_window:
+                self._request_timestamps.popleft()
+
+            # If at limit, wait until oldest request falls outside window
+            if len(self._request_timestamps) >= self._rate_limit_calls:
+                oldest_request = self._request_timestamps[0]
+                wait_time = self._rate_limit_window - (now - oldest_request)
+                if wait_time > 0:
+                    logger.warning(f"Rate limit reached. Waiting {wait_time:.1f}s before next request")
+                    time.sleep(wait_time)
+                    # Recursive call after waiting
+                    return self._check_rate_limit()
+
+            # Record this request
+            self._request_timestamps.append(now)
 
     def _make_request(self, method: str, endpoint: str, **kwargs) -> Optional[requests.Response]:
         """
@@ -50,6 +90,9 @@ class APIClient:
         # Prevent DELETE requests
         if method.upper() == 'DELETE':
             raise ValueError("DELETE requests are not allowed by this application")
+
+        # Check rate limit before making request
+        self._check_rate_limit()
 
         url = f"{self.base_url}{endpoint}"
         kwargs.setdefault('timeout', self.timeout)
@@ -72,8 +115,8 @@ class APIClient:
                 if attempt == self.max_retries - 1:
                     logger.error(f"Failed to {method} {url} after {self.max_retries} attempts")
                     return None
-                # Exponential backoff
-                time.sleep(2 ** attempt)
+                # Exponential backoff using constant
+                time.sleep(API_RETRY_BASE_DELAY ** attempt)
 
         return None
 
@@ -129,7 +172,7 @@ class APIClient:
                     with self._cache_lock:
                         self._cache = data
                         self._cache_timestamp = time.time()
-                logger.info(f"Retrieved {len(data)} items from API")
+                logger.debug(f"Retrieved {len(data)} items from API")
                 return data
             except ValueError as e:
                 logger.error(f"Failed to parse JSON response: {e}")
@@ -182,7 +225,7 @@ class APIClient:
                 # Update cache
                 with self._cache_lock:
                     self._cache[item_id] = data
-                logger.info(f"Created item {item_id}")
+                logger.debug(f"Created item {item_id} via API")
                 return data
             except ValueError as e:
                 logger.error(f"Failed to parse JSON response: {e}")
@@ -206,7 +249,7 @@ class APIClient:
                 # Update cache
                 with self._cache_lock:
                     self._cache[item_id] = data
-                logger.info(f"Updated item {item_id}")
+                logger.debug(f"Updated item {item_id} via API")
                 return data
             except ValueError as e:
                 logger.error(f"Failed to parse JSON response: {e}")

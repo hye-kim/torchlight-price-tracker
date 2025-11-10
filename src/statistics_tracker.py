@@ -5,12 +5,12 @@ Manages drop statistics, income calculations, and map tracking.
 
 import logging
 import time
-from typing import Dict, List, Tuple, Optional, Set
 from threading import Lock
+from typing import Dict, List, Optional, Set, Tuple
 
-from .file_manager import FileManager
 from .config_manager import ConfigManager
-from .constants import TAX_RATE, EXCLUDED_ITEM_ID
+from .constants import calculate_price_with_tax
+from .file_manager import FileManager
 
 logger = logging.getLogger(__name__)
 
@@ -152,11 +152,9 @@ class StatisticsTracker:
         # Calculate price
         price = 0.0
         if item_id in full_table:
-            price = full_table[item_id].get("price", 0.0)
-
-            # Apply tax if enabled
-            if self.config_manager.is_tax_enabled() and item_id != EXCLUDED_ITEM_ID:
-                price = price * TAX_RATE
+            base_price = full_table[item_id].get("price", 0.0)
+            # Apply tax if enabled using centralized calculation
+            price = calculate_price_with_tax(base_price, item_id, self.config_manager.is_tax_enabled())
 
             # Update income
             self.income += price * amount
