@@ -43,9 +43,9 @@ class GameDetector:
         if not WINDOWS_MODULES_AVAILABLE:
             return None
 
-        found_hwnd = None
+        found_hwnd: Optional[int] = None
 
-        def enum_windows_callback(hwnd, _):
+        def enum_windows_callback(hwnd: int, _: Any) -> bool:
             nonlocal found_hwnd
             try:
                 # Extra safety check for modules

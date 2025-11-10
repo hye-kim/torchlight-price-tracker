@@ -185,6 +185,31 @@ LOG_FILE_REOPEN_INTERVAL = 30.0  # seconds - How often to check if log file need
 
 # UI Configuration - Additional
 UI_LISTBOX_ITEM_HEIGHT = 20  # pixels - Approximate height per list item
+UI_MIN_WINDOW_WIDTH = 400
+UI_MIN_WINDOW_HEIGHT = 600
+UI_DEFAULT_WINDOW_WIDTH = 500
+UI_DEFAULT_WINDOW_HEIGHT = 800
+
+# UI Color Palette
+UI_COLORS = {
+    'bg_primary': '#1e1e2e',
+    'bg_secondary': '#2a2a3e',
+    'bg_tertiary': '#363650',
+    'accent': '#8b5cf6',
+    'accent_hover': '#9d70f7',
+    'success': '#10b981',
+    'warning': '#f59e0b',
+    'error': '#ef4444',
+    'text_primary': '#e2e8f0',
+    'text_secondary': '#94a3b8',
+    'border': '#4a4a5e',
+}
+
+# Excel Export Configuration
+EXCEL_HEADER_COLOR = "8b5cf6"
+EXCEL_CATEGORY_COLOR = "2a2a3e"
+EXCEL_MAX_COLUMN_WIDTH = 50
+EXCEL_COLUMN_PADDING = 2
 
 # Default Configuration
 DEFAULT_CONFIG = {
@@ -209,3 +234,80 @@ def calculate_price_with_tax(price: float, item_id: str, tax_enabled: bool) -> f
     if tax_enabled and item_id != EXCLUDED_ITEM_ID:
         return price * TAX_RATE
     return price
+
+
+def format_duration(seconds: float) -> str:
+    """
+    Format duration in seconds to a human-readable string.
+
+    Args:
+        seconds: Duration in seconds
+
+    Returns:
+        Formatted string like "2h 30m 45s" or "5m 12s"
+    """
+    hours = int(seconds // 3600)
+    minutes = int((seconds % 3600) // 60)
+    secs = int(seconds % 60)
+
+    if hours > 0:
+        return f"{hours}h {minutes}m {secs}s"
+    return f"{minutes}m {secs}s"
+
+
+def get_price_freshness_status(last_update: float, current_time: float) -> str:
+    """
+    Determine the freshness status of a price based on last update time.
+
+    Args:
+        last_update: Timestamp of last price update
+        current_time: Current timestamp
+
+    Returns:
+        Status string: "Fresh", "Stale", or "Old"
+    """
+    time_passed = current_time - last_update
+
+    if time_passed < TIME_FRESH_THRESHOLD:
+        return "Fresh"
+    elif time_passed < TIME_STALE_THRESHOLD:
+        return "Stale"
+    else:
+        return "Old"
+
+
+def get_price_freshness_indicator(last_update: float, current_time: float) -> str:
+    """
+    Get the visual indicator for price freshness.
+
+    Args:
+        last_update: Timestamp of last price update
+        current_time: Current timestamp
+
+    Returns:
+        Status indicator: STATUS_FRESH, STATUS_STALE, or STATUS_OLD
+    """
+    time_passed = current_time - last_update
+
+    if time_passed < TIME_FRESH_THRESHOLD:
+        return STATUS_FRESH
+    elif time_passed < TIME_STALE_THRESHOLD:
+        return STATUS_STALE
+    else:
+        return STATUS_OLD
+
+
+def calculate_fe_per_hour(income: float, duration: float) -> float:
+    """
+    Calculate Flame Elementium per hour rate.
+
+    Args:
+        income: Total FE earned
+        duration: Duration in seconds
+
+    Returns:
+        FE per hour rate (0 if duration is 0)
+    """
+    if duration <= 0:
+        return 0.0
+    return income / (duration / 3600)

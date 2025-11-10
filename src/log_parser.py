@@ -6,7 +6,7 @@ Handles extraction of game events from log files.
 import logging
 import re
 import time
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from .constants import (
     EXCLUDED_ITEM_ID,

@@ -8,7 +8,7 @@ type hints, logging, and thread safety.
 import logging
 import time
 import threading
-from typing import Optional, Dict, Any
+from typing import Any, Dict, List, Optional
 import sys
 from datetime import datetime
 
@@ -18,30 +18,33 @@ from PyQt5.QtWidgets import (
     QFileDialog, QSystemTrayIcon, QMenu, QAction
 )
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QObject
-from PyQt5.QtGui import QIcon, QCloseEvent
+from PyQt5.QtGui import QCloseEvent
 
 from src.constants import (
     APP_TITLE,
-    EXCLUDED_ITEM_ID,
+    EXCEL_CATEGORY_COLOR,
+    EXCEL_COLUMN_PADDING,
+    EXCEL_HEADER_COLOR,
+    EXCEL_MAX_COLUMN_WIDTH,
     FILTER_ASHES,
     FILTER_COMPASS,
     FILTER_CURRENCY,
     FILTER_GLOW,
     FILTER_OTHERS,
     ITEM_TYPES,
-    LOG_POLL_INTERVAL,
     LOG_FILE_REOPEN_INTERVAL,
-    STATUS_FRESH,
-    STATUS_OLD,
-    STATUS_STALE,
-    TIME_FRESH_THRESHOLD,
-    TIME_STALE_THRESHOLD,
-    UI_FONT_FAMILY,
-    UI_FONT_SIZE_LARGE,
-    UI_FONT_SIZE_MEDIUM,
+    LOG_POLL_INTERVAL,
+    UI_COLORS,
+    UI_DEFAULT_WINDOW_HEIGHT,
+    UI_DEFAULT_WINDOW_WIDTH,
     UI_LISTBOX_HEIGHT,
-    UI_LISTBOX_WIDTH,
+    UI_MIN_WINDOW_HEIGHT,
+    UI_MIN_WINDOW_WIDTH,
+    calculate_fe_per_hour,
     calculate_price_with_tax,
+    format_duration,
+    get_price_freshness_indicator,
+    get_price_freshness_status,
 )
 from src.config_manager import ConfigManager
 from src.file_manager import FileManager
@@ -52,7 +55,7 @@ from src.game_detector import GameDetector
 
 # Setup logging with UTF-8 encoding to handle Unicode characters
 # Note: When running as a GUI application (console=False), sys.stdout may be None
-handlers = [logging.FileHandler('tracker.log', encoding='utf-8')]
+handlers: list[logging.Handler] = [logging.FileHandler('tracker.log', encoding='utf-8')]
 
 # Only add console handler if stdout exists (i.e., when running with console)
 if sys.stdout is not None:
@@ -124,20 +127,8 @@ class TrackerApp(QMainWindow):
         self.signals.update_display.connect(self.update_display)
         self.signals.reshow_drops.connect(self.reshow)
 
-        # Initialize color palette
-        self.colors = {
-            'bg_primary': '#1e1e2e',
-            'bg_secondary': '#2a2a3e',
-            'bg_tertiary': '#363650',
-            'accent': '#8b5cf6',
-            'accent_hover': '#9d70f7',
-            'success': '#10b981',
-            'warning': '#f59e0b',
-            'error': '#ef4444',
-            'text_primary': '#e2e8f0',
-            'text_secondary': '#94a3b8',
-            'border': '#4a4a5e',
-        }
+        # Initialize color palette from constants
+        self.colors = UI_COLORS
 
         self._setup_window()
         self._apply_stylesheet()
@@ -161,8 +152,8 @@ class TrackerApp(QMainWindow):
         # Make window resizable with minimum size constraints
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
-        self.setMinimumSize(400, 600)
-        self.resize(500, 800)  # Default size
+        self.setMinimumSize(UI_MIN_WINDOW_WIDTH, UI_MIN_WINDOW_HEIGHT)
+        self.resize(UI_DEFAULT_WINDOW_WIDTH, UI_DEFAULT_WINDOW_HEIGHT)
 
     def _apply_stylesheet(self) -> None:
         """Apply Qt Style Sheet for modern dark theme."""
@@ -615,7 +606,7 @@ class TrackerApp(QMainWindow):
             btn = QPushButton(text)
             btn.setProperty("class", "secondary")
             btn.setCursor(Qt.PointingHandCursor)
-            btn.clicked.connect(lambda checked, f=filter_type: self.set_filter(f))
+            btn.clicked.connect(lambda _, f=filter_type: self.set_filter(f))
             filters_layout.addWidget(btn)
 
         layout.addWidget(filters_card)
@@ -878,17 +869,10 @@ class TrackerApp(QMainWindow):
             if item_type not in self.current_show_types:
                 continue
 
-            # Determine status based on last update time
+            # Determine status based on last update time using helper
             now = time.time()
             last_update = item_data.get("last_update", 0)
-            time_passed = now - last_update
-
-            if time_passed < TIME_FRESH_THRESHOLD:
-                status = STATUS_FRESH
-            elif time_passed < TIME_STALE_THRESHOLD:
-                status = STATUS_STALE
-            else:
-                status = STATUS_OLD
+            status = get_price_freshness_indicator(last_update, now)
 
             # Calculate price with tax if applicable using centralized function
             base_price = item_data.get("price", 0)
@@ -1026,11 +1010,140 @@ class TrackerApp(QMainWindow):
                 geometry.width(), geometry.height()
             )
 
+    def _prepare_export_data(self, stats: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """
+        Prepare drop data for Excel export.
+
+        Args:
+            stats: Statistics dictionary containing drops
+
+        Returns:
+            List of drop data dictionaries sorted by category and value
+        """
+        drops = stats['drops']
+        full_table = self.file_manager.load_full_table()
+        drop_data = []
+
+        for item_id, count in drops.items():
+            if item_id not in full_table:
+                continue
+
+            item_data = full_table[item_id]
+            item_name = item_data.get("name", item_id)
+            item_type = item_data.get("type", "Unknown")
+            base_price = item_data.get("price", 0)
+
+            # Apply tax if enabled using centralized function
+            item_price = calculate_price_with_tax(base_price, item_id, self.config_manager.is_tax_enabled())
+            total_value = round(count * item_price, 2)
+
+            # Determine freshness status using helper
+            now = time.time()
+            last_update = item_data.get("last_update", 0)
+            status = get_price_freshness_status(last_update, now)
+
+            drop_data.append({
+                'category': item_type,
+                'name': item_name,
+                'count': count,
+                'unit_price': round(item_price, 2),
+                'total_value': total_value,
+                'status': status
+            })
+
+        # Sort by category, then by total value descending
+        drop_data.sort(key=lambda x: (ITEM_TYPES.index(x['category']) if x['category'] in ITEM_TYPES else 999, -x['total_value']))
+        return drop_data
+
+    def _write_excel_metadata(self, ws, export_type: str, stats: Dict[str, Any]) -> None:
+        """
+        Write metadata rows to Excel worksheet.
+
+        Args:
+            ws: Worksheet to write to
+            export_type: Type of export (e.g., "All Drops" or "Current Map Drops")
+            stats: Statistics dictionary
+        """
+        ws.append([f"Torchlight Infinite Drops Export - {export_type}"])
+        ws.append([f"Export Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"])
+
+        # Format and add time elapsed using helper
+        duration = stats['duration']
+        time_str = format_duration(duration)
+        ws.append([f"Time Elapsed: {time_str}"])
+
+        # Add map count for total stats
+        if 'map_count' in stats:
+            ws.append([f"Map Count: {stats['map_count']}"])
+
+        # Calculate and add FE/hour using helper
+        fe_per_hour = calculate_fe_per_hour(stats['income'], duration)
+        ws.append([f"FE/Hour: {round(fe_per_hour, 2)}"])
+        ws.append([f"Total Income: {round(stats['income'], 2)} FE"])
+        ws.append([])  # Empty row
+
+    def _write_excel_data(self, ws, drop_data: List[Dict[str, Any]], header_font, header_fill) -> None:
+        """
+        Write drop data to Excel worksheet.
+
+        Args:
+            ws: Worksheet to write to
+            drop_data: List of drop data dictionaries
+            header_font: Font for header row
+            header_fill: Fill for header row
+        """
+        # Write headers
+        headers = ["Category", "Item Name", "Quantity", "Unit Price", "Total Value", "Price Status"]
+        ws.append(headers)
+
+        header_row = ws[ws.max_row]
+        for cell in header_row:
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = Alignment(horizontal="center", vertical="center")
+
+        # Write data
+        current_category = None
+        for item in drop_data:
+            # Add category separator
+            if item['category'] != current_category:
+                current_category = item['category']
+                ws.append([])  # Empty row before new category
+
+            ws.append([
+                item['category'],
+                item['name'],
+                item['count'],
+                item['unit_price'],
+                item['total_value'],
+                item['status']
+            ])
+
+    def _auto_adjust_column_widths(self, ws) -> None:
+        """
+        Auto-adjust column widths based on content.
+
+        Args:
+            ws: Worksheet to adjust
+        """
+        for col_idx, column in enumerate(ws.columns, start=1):
+            max_length = 0
+            for cell in column:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                except (AttributeError, TypeError):
+                    pass
+            adjusted_width = min(max_length + EXCEL_COLUMN_PADDING, EXCEL_MAX_COLUMN_WIDTH)
+            column_letter = get_column_letter(col_idx)
+            ws.column_dimensions[column_letter].width = adjusted_width
+
     def export_drops_to_excel(self) -> None:
         """Export drops to an Excel file sorted by item category."""
         try:
             from openpyxl import Workbook
             from openpyxl.styles import Font, PatternFill, Alignment
+            from openpyxl.utils import get_column_letter
         except ImportError:
             QMessageBox.warning(
                 self,
@@ -1049,9 +1162,7 @@ class TrackerApp(QMainWindow):
                 stats = self.statistics_tracker.get_current_map_stats()
                 export_type = "Current Map Drops"
 
-            drops = stats['drops']
-
-            if not drops:
+            if not stats['drops']:
                 QMessageBox.information(
                     self,
                     "No Drops",
@@ -1059,47 +1170,8 @@ class TrackerApp(QMainWindow):
                 )
                 return
 
-            full_table = self.file_manager.load_full_table()
-
-            # Prepare data sorted by category
-            drop_data = []
-            for item_id, count in drops.items():
-                if item_id not in full_table:
-                    continue
-
-                item_data = full_table[item_id]
-                item_name = item_data.get("name", item_id)
-                item_type = item_data.get("type", "Unknown")
-                base_price = item_data.get("price", 0)
-
-                # Apply tax if enabled using centralized function
-                item_price = calculate_price_with_tax(base_price, item_id, self.config_manager.is_tax_enabled())
-
-                total_value = round(count * item_price, 2)
-
-                # Determine freshness status
-                now = time.time()
-                last_update = item_data.get("last_update", 0)
-                time_passed = now - last_update
-
-                if time_passed < TIME_FRESH_THRESHOLD:
-                    status = "Fresh"
-                elif time_passed < TIME_STALE_THRESHOLD:
-                    status = "Stale"
-                else:
-                    status = "Old"
-
-                drop_data.append({
-                    'category': item_type,
-                    'name': item_name,
-                    'count': count,
-                    'unit_price': round(item_price, 2),
-                    'total_value': total_value,
-                    'status': status
-                })
-
-            # Sort by category, then by total value descending
-            drop_data.sort(key=lambda x: (ITEM_TYPES.index(x['category']) if x['category'] in ITEM_TYPES else 999, -x['total_value']))
+            # Prepare data using helper method
+            drop_data = self._prepare_export_data(stats)
 
             # Prompt user for save location
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -1118,81 +1190,28 @@ class TrackerApp(QMainWindow):
             # Create Excel workbook
             wb = Workbook()
             ws = wb.active
+            if ws is None:
+                # This should never happen with a new workbook, but handle it for type safety
+                ws = wb.create_sheet("Drops Export")
             ws.title = "Drops Export"
 
             # Define styles
             header_font = Font(bold=True, size=12, color="FFFFFF")
-            header_fill = PatternFill(start_color="8b5cf6", end_color="8b5cf6", fill_type="solid")
-            category_font = Font(bold=True, size=11)
-            category_fill = PatternFill(start_color="2a2a3e", end_color="2a2a3e", fill_type="solid")
+            header_fill = PatternFill(start_color=EXCEL_HEADER_COLOR, end_color=EXCEL_HEADER_COLOR, fill_type="solid")
 
-            # Write metadata
-            ws.append([f"Torchlight Infinite Drops Export - {export_type}"])
-            ws.append([f"Export Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"])
-
-            # Calculate time elapsed
-            duration = stats['duration']
-            hours = int(duration // 3600)
-            minutes = int((duration % 3600) // 60)
-            seconds = int(duration % 60)
-            time_str = f"{hours}h {minutes}m {seconds}s" if hours > 0 else f"{minutes}m {seconds}s"
-            ws.append([f"Time Elapsed: {time_str}"])
-
-            # Add map count for total stats
-            if 'map_count' in stats:
-                ws.append([f"Map Count: {stats['map_count']}"])
-
-            # Calculate and add FE/hour
-            fe_per_hour = (stats['income'] / (duration / 3600)) if duration > 0 else 0
-            ws.append([f"FE/Hour: {round(fe_per_hour, 2)}"])
-
-            ws.append([f"Total Income: {round(stats['income'], 2)} FE"])
-            ws.append([])  # Empty row
-
-            # Write headers
-            headers = ["Category", "Item Name", "Quantity", "Unit Price", "Total Value", "Price Status"]
-            ws.append(headers)
-
-            header_row = ws[ws.max_row]
-            for cell in header_row:
-                cell.font = header_font
-                cell.fill = header_fill
-                cell.alignment = Alignment(horizontal="center", vertical="center")
-
-            # Write data
-            current_category = None
-            for item in drop_data:
-                # Add category separator
-                if item['category'] != current_category:
-                    current_category = item['category']
-                    ws.append([])  # Empty row before new category
-
-                ws.append([
-                    item['category'],
-                    item['name'],
-                    item['count'],
-                    item['unit_price'],
-                    item['total_value'],
-                    item['status']
-                ])
-
-            # Auto-adjust column widths
-            for column in ws.columns:
-                max_length = 0
-                column_letter = column[0].column_letter
-                for cell in column:
-                    try:
-                        if len(str(cell.value)) > max_length:
-                            max_length = len(str(cell.value))
-                    except:
-                        pass
-                adjusted_width = min(max_length + 2, 50)
-                ws.column_dimensions[column_letter].width = adjusted_width
+            # Write metadata, data, and adjust formatting using helper methods
+            self._write_excel_metadata(ws, export_type, stats)
+            self._write_excel_data(ws, drop_data, header_font, header_fill)
+            self._auto_adjust_column_widths(ws)
 
             # Save the workbook
             wb.save(file_path)
 
             # Build success message with all stats
+            duration = stats['duration']
+            time_str = format_duration(duration)
+            fe_per_hour = calculate_fe_per_hour(stats['income'], duration)
+
             success_msg = f"Drops have been exported to:\n{file_path}\n\n"
             success_msg += f"Total items: {len(drop_data)}\n"
             success_msg += f"Time elapsed: {time_str}\n"
