@@ -20,6 +20,10 @@ class AppConfig:
     opacity: float = 1.0
     tax: int = 0
     user: str = ""
+    api_enabled: bool = True
+    api_url: str = "https://torchlight-price-tracker.onrender.com"
+    api_timeout: int = 60
+    use_local_fallback: bool = True
     window_x: Optional[int] = None
     window_y: Optional[int] = None
     window_width: Optional[int] = None
@@ -89,7 +93,7 @@ class ConfigManager:
                 config_dict = json.load(f)
 
             # Filter to only known fields for backward compatibility
-            known_fields = {'opacity', 'tax', 'user', 'window_x', 'window_y', 'window_width', 'window_height'}
+            known_fields = {'opacity', 'tax', 'user', 'api_enabled', 'api_url', 'api_timeout', 'use_local_fallback', 'window_x', 'window_y', 'window_width', 'window_height'}
             filtered_config = {k: v for k, v in config_dict.items() if k in known_fields}
 
             self._config = AppConfig(**filtered_config)
