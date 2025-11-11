@@ -215,7 +215,11 @@ EXCEL_COLUMN_PADDING = 2
 DEFAULT_CONFIG = {
     "opacity": 1.0,
     "tax": 0,
-    "user": ""
+    "user": "",
+    "api_enabled": True,
+    "api_url": "https://torchlight-price-tracker.onrender.com",
+    "api_timeout": 60,
+    "use_local_fallback": True
 }
 
 
